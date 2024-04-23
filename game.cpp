@@ -57,6 +57,25 @@ public:
                 keep[i] = false;
     }
 
+    std::vector<int> possibleScores() {
+        std::vector<int> scores = {
+            ones(),
+            twos(),
+            threes(),
+            fours(),
+            fives(),
+            sixes(),
+            threeOfAKind(),
+            fourOfAKind(),
+            fullHouse(),
+            smallStraight(),
+            largeStraight(),
+            yahtzee(),
+            chance()
+        };
+        return scores;
+    }
+
     int ones() const {
         return countDice(1);
     }
@@ -107,12 +126,12 @@ public:
         return 0;
     }
 
-    int chance() const {
-        return sumDice();
-    }
-
     int yahtzee() const {
         return isYahtzee() ? 50 : 0;
+    }
+
+    int chance() const {
+        return sumDice();
     }
 
 private:
@@ -148,7 +167,7 @@ private:
 
     bool isFullHouse() const {
         bool two = false, three = false;
-        for (int i = 1; i <= 6; ++i) {
+        for (int i = 1; i <= 6; ++i) { //for all dice, count the number
             int count = std::count(dice.begin(), dice.end(), i);
             if (count == 2) {
                 two = true;
@@ -156,17 +175,17 @@ private:
                 three = true;
             }
         }
-        return two && three;
+        return two && three; //we have to have one thats exactly 2 and one thats exactly 3
     }
 
     bool isSmallStraight() const {
-        std::vector<int> count = {0,0,0,0,0,0};
+        std::vector<int> count = {0,0,0,0,0,0}; //keep a running count of all dice
         for (int i = 0; i < 5; i++){
-            count[dice[i]-1]++;
+            count[dice[i]-1]++; //store the count at the index one below, so dice '1' is stored at [0]
         }
         return ((count[0] && count[1] && count[2] && count[3])||
                 (count[1] && count[2] && count[3] && count[4])) || 
-                 count[2] && count[3] && count[4] && count[5];
+                 count[2] && count[3] && count[4] && count[5]; 
     }
 
     bool isLargeStraight() const {
