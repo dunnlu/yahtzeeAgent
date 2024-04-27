@@ -17,31 +17,6 @@ Game::Game() {
     rollDice();
 } 
 
-/*
-// The reset function for the game. 
-void Game::reset() { 
-    // To Do: Reset the game, return the initial state. 
-} 
-
-// The step function for the game. 
-void Game::step() {
-    // To Do: Get the action, execute the action, and return the next state, R(s,a) and done. 
-    // Input: Action. 
-    // Output: next_state , reward , done. ( True if the episode is done, False if the episode is not done. ) 
-}
-
-// The render function for the game. 
-void Game::render() { 
-    // To Do: We can handle the rendering here, so that we can then call this if we need to render (final evaluation), and not call it during the training. (save the compute) 
-}
-
-// The get current state function for the game. 
-void Game::getCurrentState() {
-    // 
-}
-
-*/
-
 void Game::rollDice() {
     for (int i = 0; i < 5; ++i) {
         if (!keep[i]) {
