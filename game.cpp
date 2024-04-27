@@ -15,7 +15,30 @@ Game::Game() {
     dice.resize(5);
     keep.resize(5, false);
     rollDice();
+} 
+
+/*
+// The reset function for the game. 
+void Game::reset() {
+    // 
+} 
+
+// The step function for the game. 
+void Game::step() {
+    // 
 }
+
+// The render function for the game. 
+void Game::render() {
+    // 
+}
+
+// The get current state function for the game. 
+void Game::getCurrentState() {
+    // 
+}
+
+*/
 
 void Game::rollDice() {
     for (int i = 0; i < 5; ++i) {
@@ -187,3 +210,5 @@ bool Game::isLargeStraight() const {
 bool Game::isYahtzee() const {
     return std::all_of(dice.begin(), dice.end(), [&](int die) { return die == dice[0]; });
 }
+
+

@@ -9,7 +9,12 @@ int main(){
     game.toggleKeep(1);
 
     game.rollDice();
+    game.printDice();
 
+    game.rollDice();
+    game.printDice();
+
+    game.rollDice();
     game.printDice();
 
     std::vector<int> scores = game.possibleScores();
