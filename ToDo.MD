@@ -11,3 +11,6 @@
 ### Note: 
 
 1. I think it make sense for everyne to have the option of choosing what language they can use to implement their assigned algorithm. Using the current game_bindings.cpp template, it is easy to create the bindings. 
+
+2. Since there are 32 + X actions, if the remaining rolls is 0, the action space reduce by 32, therefore during certain states, we can decide between a subset of the 32 + X actions. 
+
