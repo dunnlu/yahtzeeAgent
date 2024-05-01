@@ -1,5 +1,5 @@
 #include <pybind11/pybind11.h>
-#include "game.h"  // Ensure this includes the definition of your Game class
+#include "../game/game.h"  // Ensure this includes the definition of your Game class
 
 namespace py = pybind11;
 
