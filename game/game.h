@@ -13,6 +13,7 @@ private:
     std::vector<int> dice;
     std::vector<bool> keep;
     Die die;
+    int rollsLeft;
 
 public:
     Game();
@@ -22,6 +23,8 @@ public:
     void toggleKeep(int index);
     void resetKeep();
     std::vector<int> possibleScores() const;
+
+    void resetRollsLeft();
 
     int ones() const;
     int twos() const;

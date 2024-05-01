@@ -14,10 +14,15 @@ Game::Game() {
     srand(static_cast<unsigned int>(time(0)));
     dice.resize(5);
     keep.resize(5, false);
+    rollsLeft = 3;
     rollDice();
 } 
 
 void Game::rollDice() {
+    if (rollsLeft == 0)
+        return;
+
+
     for (int i = 0; i < 5; ++i) {
         if (!keep[i]) {
             dice[i] = die.roll();
@@ -25,6 +30,7 @@ void Game::rollDice() {
     }
     std::sort(dice.begin(), dice.end());
     resetKeep();
+    rollsLeft--;
 }
 
 void Game::printDice() const {
@@ -66,6 +72,15 @@ std::vector<int> Game::possibleScores() const {
         chance()
     };
     return scores;
+}
+
+
+void Game::resetRollsLeft(){
+    rollsLeft = 3;
+}
+
+int Game::getRollsLeft(){
+    return rollsLeft;
 }
 
 int Game::ones() const {
