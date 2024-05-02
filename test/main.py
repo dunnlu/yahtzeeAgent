@@ -76,12 +76,48 @@ def test_3() :
     else : 
         print( "----------------------------- Test 3 has failed. ---------------------------- " ) 
 
+def test_4() : 
+    """
+    1. If action is not to store while the ramining rolls is equal to 0, get a negative reward. (same state) 
+    """ 
+    # Create an instance of the Game class
+    game = game_module.Game() 
+    # Print the results of the dice roll
+    # game.printDice() 
+    state_0  = game.reset() 
+    # print( state_0 ) 
+    state_1 , reward_1 , terminal_1 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    # print( state_1 , reward_1 , terminal_1 ) 
+    state_2 , reward_2 , terminal_2 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    # print( state_2 , reward_2 , terminal_2 ) 
+    # Expect to get negative reward. (same state) 
+    state_3 , reward_3 , terminal_3 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    # Expect to get negative reward. (same state) 
+    state_4 , reward_4 , terminal_4 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    # Expect to get negative reward. (same state) 
+    state_5 , reward_5 , terminal_5 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    # Expect to get negative reward. (same state) 
+    state_6 , reward_6 , terminal_6 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    # Expect to get negative reward. (same state) 
+    state_7 , reward_7 , terminal_7 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+
+    if ( state_2 == state_3 == state_4 == state_5 == state_5 == state_6 == state_7 ) and ( reward_3 == reward_4 == reward_5 == reward_6 == reward_7 == -10) : 
+        print( "----------------------------- Test 4 has passed. ---------------------------- " ) 
+    else : 
+        print( "----------------------------- Test 4 has failed. ---------------------------- " ) 
+
+
 
 
 def main(): 
     test_1() 
     test_2() 
     test_3() 
+    test_4() 
+
+    
+
+
     
 if __name__ == "__main__":
     main()
