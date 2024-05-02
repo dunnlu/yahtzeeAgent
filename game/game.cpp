@@ -83,6 +83,12 @@ std::tuple<std::vector<int>,int,bool> Game::step( std::vector<int> action ) {
         resetKeep() ; 
         // Roll the dice. 
         rollDice() ; 
+
+        // Copy the dice values to the state. 
+        for ( int i = 0 ; i < 5 ; i ++ ) 
+        { 
+            state[ i ] = dice[ i ] ; 
+        } 
         // Update the remaining rolls. 
         state[ 5 ] = 2 ; 
         // Find out if it is terminal. 
