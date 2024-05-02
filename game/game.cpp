@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <ctime>
 #include <cstdlib>
+#include <tuple> 
 
 #include "game.h"
 
@@ -10,11 +11,124 @@ int Die::roll() {
     return rand() % 6 + 1;
 }
 
-Game::Game() {
-    srand(static_cast<unsigned int>(time(0)));
+Game::Game() { 
+
+    // Set the random seed. 
+    srand(static_cast<unsigned int>(time(0))); 
+    // Set the size of the state. 
+    state.resize(19) ; 
+    // Set the size of the dice. 
     dice.resize(5);
-    keep.resize(5, false);
-    rollDice();
+    // Set the size of the keep, initialize is to False. 
+    keep.resize(5, false); 
+    
+    // Reset the game. 
+    reset() ; 
+
+} 
+
+std::tuple<std::vector<int>,int,bool> Game::step( std::vector<int> action ) { 
+    /* 
+    Input: 
+    1. Action: { roll_dice_1 , roll_dice_2 , roll_dice_3 , roll_dice_4 , roll_dice_5 , store_at_index }. 
+    */ 
+
+   // If the decision is not to store. 
+   if ( action[ 5 ] == - 1 ) 
+   { 
+        // If there is no remaining rolls: 
+        if ( state[ 5 ] == 0 ) 
+        { 
+            // Give a negative reward, return the same state. 
+            return std::make_tuple( state ,  - 10 , false ) ; 
+        } 
+        else 
+        { 
+            // Set the keep. 
+            for ( int i = 0 ; i < 5 ; i ++ ) 
+            { 
+                if ( action[ i ] == 1 ) 
+                { 
+                    keep[ i ] = true ; 
+                } 
+                else
+                { 
+                    keep[ i ] = false ; 
+                }
+            }
+            // Roll the dice. 
+            rollDice() ; 
+            // Copy the dice values to the state. 
+            for ( int i = 0 ; i < 5 ; i ++ ) 
+            { 
+                state[ i ] = dice[ i ] ; 
+            } 
+            // Update the remaining rolls. 
+            state[ 5 ] -- ; 
+            
+            // Return the next state, give a 0 reward. 
+            return std::make_tuple( state , 0 , false ) ; 
+        }
+   } 
+   // If the decision is to store. 
+   else 
+   { 
+        // Get the potential scores. 
+        std::vector<int> potential_scores = possibleScores() ; 
+        // Calculate the reward. 
+        int current_reward = potential_scores[ action[ 5 ] ] ; 
+        // Set the category to taken. 
+        state[ 6 + action[ 5 ] ] = 1 ; 
+        // Set all of the keep to false. 
+        resetKeep() ; 
+        // Roll the dice. 
+        rollDice() ; 
+        // Update the remaining rolls. 
+        state[ 5 ] = 2 ; 
+        // Find out if it is terminal. 
+        bool terminal = isItTerminal() ; 
+        
+        // Return the next state, give the reward. 
+        return std::make_tuple( state , current_reward, terminal ) ; 
+
+   } 
+} 
+
+bool Game::isItTerminal() 
+{
+    bool terminal = true ; 
+    for ( int i = 6 ; i < 19 ; i ++ ) 
+    { 
+        if ( state[ i ] == 0 )
+        { 
+            terminal = false ; 
+        }
+    } 
+
+    return terminal ; 
+}
+
+std::vector<int> Game::reset() { 
+
+    // Set all of the keep to False. 
+    for ( int i = 0 ; i < 5 ; i ++ ) { 
+        keep[ i ] = false ; 
+    } 
+    // Roll the dice. 
+    rollDice() ; 
+    // Copy the dice values to state. 
+    for ( int i = 0 ; i < 5 ; i ++ ) { 
+        state[ i ] = dice[ i ] ; 
+    } 
+    // Set the remaining roll to 2. 
+    state[ 5 ] = 2 ; 
+    // Set all of the taken to 0. 
+    for ( int i = 6 ; i < 19 ; i ++ ) { 
+        state[ i ] = 0 ; 
+    } 
+
+    return state ; 
+
 } 
 
 void Game::rollDice() {
@@ -25,7 +139,7 @@ void Game::rollDice() {
     }
     std::sort(dice.begin(), dice.end());
     resetKeep();
-}
+} 
 
 void Game::printDice() const {
     std::cout << "Dice: ";
@@ -187,5 +301,8 @@ bool Game::isLargeStraight() const {
 bool Game::isYahtzee() const {
     return std::all_of(dice.begin(), dice.end(), [&](int die) { return die == dice[0]; });
 }
+
+
+
 
 

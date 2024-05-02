@@ -13,10 +13,14 @@ private:
     std::vector<int> dice;
     std::vector<bool> keep;
     Die die;
+    std::vector<int> state ; 
 
 public:
     Game();
 
+    std::tuple<std::vector<int>,int,bool> step( std::vector<int> action ) ; 
+    bool isItTerminal() ; 
+    std::vector<int> reset() ; 
     void rollDice();
     void printDice() const;
     void toggleKeep(int index);

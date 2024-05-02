@@ -4,11 +4,12 @@ def main():
     # Create an instance of the Game class
     game = game_module.Game()
     
-    # Roll the dice
-    game.rollDice()
-    
     # Print the results of the dice roll
-    game.printDice()
+    game.printDice() 
+
+    return_value  = game.reset() 
+    print(return_value ) 
 
 if __name__ == "__main__":
     main()
+
