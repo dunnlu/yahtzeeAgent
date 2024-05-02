@@ -10,11 +10,11 @@ def test_1() :
     # Print the results of the dice roll
     # game.printDice() 
     state_0  = game.reset() 
-    # print( state_0 ) 
+    print( state_0 ) 
     state_1 , reward_1 , terminal_1 = game.step( [ 1 , 1 , 1 , 1 , 1  , - 1 ] ) 
-    # print( state_1 , reward_1 , terminal_1 ) 
+    print( state_1 , reward_1 , terminal_1 ) 
     state_2 , reward_2 , terminal_2 = game.step( [ 1 , 1 , 1 , 1 , 1 , - 1 ] ) 
-    # print( state_2 , reward_2 , terminal_2 ) 
+    print( state_2 , reward_2 , terminal_2 ) 
 
     if state_0[:5] == state_1[:5] == state_2[:5] : 
         print( "----------------------------- Test 1 has passed. ---------------------------- " ) 
@@ -31,11 +31,11 @@ def test_2() :
     # Print the results of the dice roll
     # game.printDice() 
     state_0  = game.reset() 
-    # print( state_0 ) 
+    print( state_0 ) 
     state_1 , reward_1 , terminal_1 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
-    # print( state_1 , reward_1 , terminal_1 ) 
+    print( state_1 , reward_1 , terminal_1 ) 
     state_2 , reward_2 , terminal_2 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
-    # print( state_2 , reward_2 , terminal_2 ) 
+    print( state_2 , reward_2 , terminal_2 ) 
 
     test_pass = False 
     for i in range( 5 ) : 
@@ -60,11 +60,11 @@ def test_3() :
     # Print the results of the dice roll
     # game.printDice() 
     state_0  = game.reset() 
-    # print( state_0 ) 
+    print( state_0 ) 
     state_1 , reward_1 , terminal_1 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
-    # print( state_1 , reward_1 , terminal_1 ) 
+    print( state_1 , reward_1 , terminal_1 ) 
     state_2 , reward_2 , terminal_2 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
-    # print( state_2 , reward_2 , terminal_2 ) 
+    print( state_2 , reward_2 , terminal_2 ) 
 
     test_pass = False 
     if state_0[ 5 ] == 2 and state_1[ 5 ] == 1 and state_2[ 5 ] == 0 : 
@@ -85,38 +85,60 @@ def test_4() :
     # Print the results of the dice roll
     # game.printDice() 
     state_0  = game.reset() 
-    # print( state_0 ) 
+    print( state_0 ) 
     state_1 , reward_1 , terminal_1 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
-    # print( state_1 , reward_1 , terminal_1 ) 
+    print( state_1 , reward_1 , terminal_1 ) 
     state_2 , reward_2 , terminal_2 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
-    # print( state_2 , reward_2 , terminal_2 ) 
+    print( state_2 , reward_2 , terminal_2 ) 
     # Expect to get negative reward. (same state) 
     state_3 , reward_3 , terminal_3 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    print( state_3 , reward_3 , terminal_3 ) 
     # Expect to get negative reward. (same state) 
     state_4 , reward_4 , terminal_4 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    print( state_4 , reward_4 , terminal_4 ) 
     # Expect to get negative reward. (same state) 
     state_5 , reward_5 , terminal_5 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    print( state_5 , reward_5 , terminal_5 ) 
     # Expect to get negative reward. (same state) 
     state_6 , reward_6 , terminal_6 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    print( state_6 , reward_6 , terminal_6 ) 
     # Expect to get negative reward. (same state) 
     state_7 , reward_7 , terminal_7 = game.step( [ 0 , 0 , 0 , 0 , 0 , - 1 ] ) 
+    print( state_7 , reward_7 , terminal_7 ) 
 
     if ( state_2 == state_3 == state_4 == state_5 == state_5 == state_6 == state_7 ) and ( reward_3 == reward_4 == reward_5 == reward_6 == reward_7 == -10) : 
         print( "----------------------------- Test 4 has passed. ---------------------------- " ) 
     else : 
         print( "----------------------------- Test 4 has failed. ---------------------------- " ) 
 
+def test_5() : 
+    """
+    1. If the algorithm just score at each turn, it reach the terminal state after turn 13. 
+    """ 
 
+    # Create an instance of the Game class
+    game = game_module.Game() 
+    # Print the results of the dice roll
+    # game.printDice() 
+    state_0  = game.reset() 
+    print( state_0 ) 
 
+    terminal = False 
+    for i in range( 13 ) : 
+        curr_state , reward , terminal = game.step( [ 1 , 1 , 1 , 1 , 1 , i ] ) 
+        print( curr_state , reward , terminal ) 
+
+    if terminal == True : 
+        print( "----------------------------- Test 5 has passed. ---------------------------- " ) 
+    else : 
+        print( "----------------------------- Test 5 has failed. ---------------------------- " ) 
 
 def main(): 
     test_1() 
     test_2() 
     test_3() 
     test_4() 
-
-    
-
+    test_5() 
 
     
 if __name__ == "__main__":
