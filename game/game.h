@@ -22,7 +22,7 @@ public:
     bool isTerminal() ; 
     std::vector<int> reset() ; 
 
-    std::vector<vector<int>> possibleAction();
+    std::vector<std::vector<int>> possibleActions();
     
     void printDice() const;
     

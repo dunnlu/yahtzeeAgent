@@ -97,7 +97,7 @@ std::tuple<std::vector<int>,int,bool> Game::step( std::vector<int> action ) {
         // Update the remaining rolls. 
         state[ 5 ] = 2 ; 
         // Find out if it is terminal. 
-        bool terminal = isItTerminal() ; 
+        bool terminal = isTerminal() ; 
         
         // Return the next state, give the reward. 
         return std::make_tuple( state , current_reward, terminal ) ; 
@@ -141,10 +141,10 @@ std::vector<int> Game::reset() {
 } 
 
 // Returns a 2d array containing all possible actions in this state
-std::vector<vector<int>> Game::possibleActions() {
-    std::vector<vector<int>> actions;
+std::vector<std::vector<int>> Game::possibleActions() {
+    std::vector<std::vector<int>> actions;
     int temp;
-    int squares = countAvailableSquares()
+    int squares = countAvailableSquares() ; 
 
 
     // add scoring actions
