@@ -4,6 +4,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <tuple> 
+#include <cmath>
 
 #include "game.h"
 
@@ -16,6 +17,10 @@ Game::Game() {
     // Set the random seed. 
     srand(static_cast<unsigned int>(time(0))); 
     // Set the size of the state. 
+        // 0 - 4 is dice
+        // 5 is rolls left
+        // 6 - 11 is upper section
+        // 12 - 18 is lower section
     state.resize(19) ; 
     // Set the size of the dice. 
     dice.resize(5);
@@ -30,7 +35,7 @@ Game::Game() {
 std::tuple<std::vector<int>,int,bool> Game::step( std::vector<int> action ) { 
     /* 
     Input: 
-    1. Action: { roll_dice_1 , roll_dice_2 , roll_dice_3 , roll_dice_4 , roll_dice_5 , store_at_index }. 
+    1. Action: { keep_dice_1 , keep_dice_2 , keep_dice_3 , keep_dice_4 , keep_dice_5 , store_at_index }. 
     */ 
 
    // If the decision is not to store. 
@@ -100,7 +105,7 @@ std::tuple<std::vector<int>,int,bool> Game::step( std::vector<int> action ) {
    } 
 } 
 
-bool Game::isItTerminal() 
+bool Game::isTerminal() 
 {
     bool terminal = true ; 
     for ( int i = 6 ; i < 19 ; i ++ ) 
@@ -117,9 +122,7 @@ bool Game::isItTerminal()
 std::vector<int> Game::reset() { 
 
     // Set all of the keep to False. 
-    for ( int i = 0 ; i < 5 ; i ++ ) { 
-        keep[ i ] = false ; 
-    } 
+    resetKeep();
     // Roll the dice. 
     rollDice() ; 
     // Copy the dice values to state. 
@@ -136,6 +139,96 @@ std::vector<int> Game::reset() {
     return state ; 
 
 } 
+
+// Returns a 2d array containing all possible actions in this state
+std::vector<vector<int>> Game::possibleActions() {
+    std::vector<vector<int>> actions;
+    int temp;
+    int squares = countAvailableSquares()
+
+
+    // add scoring actions
+
+    actions.resize(squares);
+    int next = 6;
+    for (int i = 0; i < squares; i++) {
+
+        // Action: { keep_dice_1 , keep_dice_2 , keep_dice_3 , keep_dice_4 , keep_dice_5 , store_at_index }
+
+        actions[i].resize(6);
+
+        // fill dice keep with zeroes
+
+        for (int j = 0; j < 5; j++)
+            actions[i][j] = 0;
+        
+        //next available square
+
+        while (state[next] == 1)
+            next++;
+        actions[i][5] = next;
+        next++;
+    }
+
+
+    // add dice keep actions, only if there are rolls left
+
+    if (state[5] > 0){
+
+        //resize once, add all possible dice keeps
+
+        actions.resize(squares + 32); 
+
+        // add all actions where you decide to keep rolling
+
+        for (int i = 0; i < 32; i++) {
+
+            // 0th dice keep state is the 'squares'th state, for example if we had 5 available squares, keeping no dice would be possibleActions[5]
+
+            actions[squares + i].resize(6); 
+            temp = i;
+
+            // fill 0-4 with the binary representation of the index, example, 10 would be 01010 and 1 would be 00001
+
+            for (int j = 0; j<5; j++) {
+                actions[squares + i][j] = temp % 2;
+                temp /= 2;
+            }
+            actions[squares + i][5] = -1;
+        }
+    }
+
+
+    return actions;
+
+}
+
+//states: 6 - 11 is upper section
+int Game::countAvailableSquaresUpper() {
+    int count = 0;
+    for (int i = 6; i < 12; i++)
+        if (state[i] == 0)
+            count++;
+    return count;
+}
+
+//states: 12-18 is lower section
+int Game::countAvailableSquaresLower() {
+    int count = 0;
+    for (int i = 12; i < 19; i++)
+        if (state[i] == 0)
+            count++;
+    return count;
+}
+
+//states: 6-18 is scoresheet
+int Game::countAvailableSquares() {
+    int count = 0;
+    for (int i = 6; i < 19; i++)
+        if (state[i] == 0)
+            count++;
+    return count;
+}
 
 void Game::rollDice() {
     for (int i = 0; i < 5; ++i) {
@@ -165,8 +258,7 @@ void Game::toggleKeep(int index) {
 
 void Game::resetKeep() {
     for (int i = 0; i<5; ++i)
-        if (keep[i])
-            keep[i] = false;
+        keep[i] = false;
 }
 
 std::vector<int> Game::possibleScores() const {

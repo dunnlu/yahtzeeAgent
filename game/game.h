@@ -18,14 +18,24 @@ private:
 public:
     Game();
 
-    std::tuple<std::vector<int>,int,bool> step( std::vector<int> action ) ; 
-    bool isItTerminal() ; 
+    std::tuple<std::vector<int>,int,bool> step( std::vector<int> action ); 
+    bool isTerminal() ; 
     std::vector<int> reset() ; 
-    void rollDice();
+
+    std::vector<vector<int>> possibleAction();
+    
     void printDice() const;
+    
+    std::vector<int> possibleScores() const;
+
+private:
+    void rollDice();
     void toggleKeep(int index);
     void resetKeep();
-    std::vector<int> possibleScores() const;
+
+    int countAvailableSquaresUpper();
+    int countAvailableSquaresLower();
+    int countAvailableSquares();
 
     int ones() const;
     int twos() const;
@@ -41,7 +51,7 @@ public:
     int yahtzee() const;
     int chance() const;
 
-private:
+
     int countDice(int value) const;
     int sumDice() const;
     

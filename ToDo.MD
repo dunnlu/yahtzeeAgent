@@ -2,6 +2,8 @@
 
 1. We can always change and modify it, let's not worry about it currently, if different people want to use different state and action representations for their algorithms, we can write multiple step functions that can use different state-action representations. 
 
+2. Should add 2 modes to the game, lowerOnly or full, defined at construction. Affects the state space, possible actions, possible scores, etc. 
+
 ### Note: 
 
 1. I think it make sense for everyone to have the option of choosing what language they can use to implement their assigned algorithm. Using the current game_bindings.cpp template, it is easy to create the bindings. 
