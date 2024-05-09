@@ -80,7 +80,7 @@ std::vector<vector<int>> Game::scoreCardConfigHalf {
 
 // Returns a 96,768 x 13 array of all state space configurations for the lower section only
 
-std::vector<vector<int>> Game::stateSpaceHalf {
+std::vector<vector<int>> Game::stateSpaceHalf() {
     // if full = true --> generate full state space
     // if full = false --> generate lower section only state space (indices of the scoreboard kept the same)
 
