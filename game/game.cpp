@@ -14,6 +14,8 @@ int Die::roll() {
 
 Game::Game() { 
 
+
+
     // Set the random seed. 
     srand(static_cast<unsigned int>(time(0))); 
     // Set the size of the state. 
@@ -21,7 +23,7 @@ Game::Game() {
         // 5 is rolls left
         // 6 - 11 is upper section
         // 12 - 18 is lower section
-    state.resize(19) ; 
+    state.resize(19);
     // Set the size of the dice. 
     dice.resize(5);
     // Set the size of the keep, initialize is to False. 
@@ -31,6 +33,103 @@ Game::Game() {
     reset() ; 
 
 } 
+
+
+
+/*
+    Function to return the list of all 252 dice combinations in non decreasing order
+
+
+*/
+
+std::vector<vector<int>> Game::diceConfigurations() {
+    std::vector<std::vector<int>> configurations;
+    
+    for (int d1 = 1; d1 <= 6; ++d1) {
+        for (int d2 = d1; d2 <= 6; ++d2) {
+            for (int d3 = d2; d3 <= 6; ++d3) {
+                for (int d4 = d3; d4 <= 6; ++d4) {
+                    for (int d5 = d4; d5 <= 6; ++d5) {
+                        configurations.push_back({d1, d2, d3, d4, d5});
+                    }
+                }
+            }
+        }
+    }
+    
+    return configurations;
+}
+
+
+std::vector<vector<int>> Game::scoreCardConfigHalf {
+    std::vector<int> config;
+    config.resize(128);
+    int count = 0;
+    for (int a = 0; a < 2; a++)
+        for (int b = 0; b < 2; b++)
+            for (int b = 0; b < 2; b++)
+                for (int c = 0; c < 2; c++)
+                    for (int d = 0; d < 2; d++)
+                        for (int e = 0; e < 2; e++)
+                            for (int f = 0; f < 2; f++) {
+                                config[count].push_back({a,b,c,d,e,f});
+                                count++;
+                            }
+    return config;
+}                   
+
+// Returns a 96,768 x 13 array of all state space configurations for the lower section only
+
+std::vector<vector<int>> Game::stateSpaceHalf {
+    // if full = true --> generate full state space
+    // if full = false --> generate lower section only state space (indices of the scoreboard kept the same)
+
+    // distribution of spaces for state space i:
+        // i % 252 == dice config
+        // i/252 % 3 == rolls left
+        // i / (252*3) == scorecard config
+
+    std::vector<vector<int>> space, diceConfig = diceConfigurations(), scorecardConfig = scorecardConfigurations();
+    space.resize(3*252*128); // 3 rolls, 252 dice, scorecard configurations
+
+    for (int i = 0; i < space.size(); i++) {
+        space[i].resize(13);
+            // 0 - 4 is dice
+            // 5 is rolls left
+            // 6 - 12 is lower section
+        for (int j = 0; j < 5; j++)
+            space[i][j] = diceConfig[i%252][j]
+        space[5] = (i / 252) % 3;
+        for (int j = 6; j < 13; j++)
+            space[i][j] = scorecardConfig[(i/(252*3)%128)][j]
+        
+    }
+
+
+    return space;
+}
+
+// Return the reward sent action (the only relevent information is the action taken in the 5th column of actions, the scorecard action)
+// Assume we are in the desired state
+
+int Game::reward(int action5) {
+    
+    // if the action is not to score or we are in a terminal state
+    
+    if ((action5 == -1) || isTerminal()) {
+        return 0;
+    } else {
+        std::vector<int> scores = possibleScores()
+        return scores[action5];
+    }
+}
+
+
+void Game::goToState(std::vector<int> target) {
+    for (int i = 0; i < 19; i++)
+        state[i] = target[i]
+}
+
 
 std::tuple<std::vector<int>,int,bool> Game::step( std::vector<int> action ) { 
     /* 

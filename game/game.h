@@ -16,7 +16,7 @@ private:
     std::vector<int> state ; 
 
 public:
-    Game();
+    Game(int mode);
 
     std::tuple<std::vector<int>,int,bool> step( std::vector<int> action ); 
     bool isTerminal() ; 
@@ -28,7 +28,17 @@ public:
     
     std::vector<int> possibleScores() const;
 
+    std::vector<vector<int>> stateSpaceHalf();
+
+
+    int reward(int action5);
+
+    void goToState(std::vector<int> target);
+
 private:
+    std::vector<vector<int>> diceConfigurations();
+    std::vector<vector<int>> scoreCardConfigHalf;
+
     void rollDice();
     void toggleKeep(int index);
     void resetKeep();
