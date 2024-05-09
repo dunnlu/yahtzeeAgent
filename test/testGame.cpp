@@ -3,21 +3,38 @@
 
 int main(){
     Game game;
+    
+    std::cout << "created game" << std::endl;
+    
+    std::vector<std::vector<int>> space = game.stateSpaceHalf();
 
-    game.printDice();
+    std::cout << "created space" << std::endl;
+    
 
-    game.toggleKeep(1);
+    //generate max reward in each state
+    std::vector<std::vector<int>> actions;
 
-    game.rollDice();
-    game.printDice();
+    std::cout << "created actions" << std::endl;
+    
 
-    game.rollDice();
-    game.printDice();
+    for (int i = 0; i < space.size(); i++){
+        game.goToState(space[i]);
 
-    game.rollDice();
-    game.printDice();
+        std::cout << "went to state " << i << std::endl;
+    
 
-    std::vector<int> scores = game.possibleScores();
-    for (int i = 0; i < scores.size(); i++)
-        std::cout << scores[i] << std::endl;
+        actions = game.possibleActions();
+
+        std::cout << "copied actions" << std::endl;
+    
+
+
+
+        for (int j = 0; j < actions.size(); j++) {
+            std::cout << i << ", " << j << ": " << game.reward(actions[j][5]) << std::endl;
+
+
+        }
+    }
+        
 }
