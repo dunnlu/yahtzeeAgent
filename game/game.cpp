@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <tuple> 
 #include <cmath>
+#include <string>
 
 #include "game.h"
 
@@ -51,6 +52,7 @@ std::vector<std::vector<int>> Game::diceConfigurations() {
                 for (int d4 = d3; d4 <= 6; ++d4) {
                     for (int d5 = d4; d5 <= 6; ++d5) {
                         configurations.push_back({d1, d2, d3, d4, d5});
+                        // std::cout << d1 << "," << d2 << "," << d3 << "," << d4 << "," << d5 << std::endl;
                     }
                 }
             }
@@ -63,16 +65,15 @@ std::vector<std::vector<int>> Game::diceConfigurations() {
 
 std::vector<std::vector<int>> Game::scoreCardConfigHalf() {
     std::vector<std::vector<int>> config;
-    config.resize(128);
-    int a,b,c,d,e,f;
+    int a,b,c,d,e,f, g;
     for ( a = 0; a < 2; a++)
         for ( b = 0; b < 2; b++)
-            for ( b = 0; b < 2; b++)
-                for ( c = 0; c < 2; c++)
-                    for ( d = 0; d < 2; d++)
-                        for ( e = 0; e < 2; e++)
-                            for ( f = 0; f < 2; f++) {
-                                config.push_back({a,b,c,d,e,f});
+            for ( c = 0; c < 2; c++)
+                for ( d = 0; d < 2; d++)
+                    for ( e = 0; e < 2; e++)
+                        for ( f = 0; f < 2; f++)
+                            for ( g = 0; g < 2; g++) {
+                                config.push_back({a,b,c,d,e,f,g});
                             }
     return config;
 }                   
@@ -88,22 +89,31 @@ std::vector<std::vector<int>> Game::stateSpaceHalf() {
         // i/252 % 3 == rolls left
         // i / (252*3) == scorecard config
 
+    
     std::vector<std::vector<int>> space, diceConfig = diceConfigurations(), scorecardConfig = scoreCardConfigHalf();
+
     space.resize(3*252*128); // 3 rolls, 252 dice, scorecard configurations
 
+    // std::cout << "dice size: " << diceConfig.size() << std::endl;
+
     for (int i = 0; i < space.size(); i++) {
-        space[i].resize(13);
+        space[i].resize(19);
             // 0 - 4 is dice
             // 5 is rolls left
-            // 6 - 12 is lower section
+            // 6 - 11 is taken upper section
+            // 12 - 18 is lower section
         for (int j = 0; j < 5; j++)
             space[i][j] = diceConfig[i%252][j];
         space[i][5] = (i / 252) % 3;
-        for (int j = 6; j < 13; j++)
-            space[i][j] = scorecardConfig[(i/(252*3)%128)][j];
+        for (int j = 6; j < 12; j++)
+            space[i][j] = 1;
+        for (int j = 12; j < 19; j++) 
+            space[i][j] = scorecardConfig[(i/(252*3)%128)][j-12];
+        
+            
+
         
     }
-
 
     return space;
 }
@@ -115,16 +125,18 @@ int Game::reward(int action5) {
     
     // if the action is not to score or we are in a terminal state
     
-    if ((action5 == -1) || isTerminal()) {
+    if ((action5 == -1)) {
         return 0;
     } else {
-        
-        return possibleScores()[action5];
+        std::vector<int> scores = possibleScores();
+        return scores[action5];
     }
 }
 
 
 void Game::goToState(std::vector<int> target) {
+    for (int i = 0; i < 5; i++)
+        dice[i] = target[i];
     for (int i = 0; i < 19; i++)
         state[i] = target[i];
 }
@@ -255,10 +267,10 @@ std::vector<std::vector<int>> Game::possibleActions() {
 
         actions[i].resize(6);
 
-        // fill dice keep with zeroes
+        // fill dice keep with ones, conceptually we are keeping all 5 dice but in reality it does not matter
 
         for (int j = 0; j < 5; j++)
-            actions[i][j] = 0;
+            actions[i][j] = 1;
         
         //next available square
 
@@ -349,6 +361,31 @@ void Game::printDice() const {
     }
     std::cout << std::endl;
 }
+
+void Game::printScorecard() const{
+    std::cout << "Scorecard: [ ";
+    for (int i = 6; i < 19; ++i) {
+        std::cout << state[i] << " ";
+    }
+    std::cout << "]" << std::endl;
+}
+
+
+void Game::printState() const {
+    std::cout << "State: " << std::endl;
+    printDice();
+    std::cout << "Rolls Left: " << state[5] << std::endl;
+    printScorecard();
+    std::cout << std::endl;
+}
+
+
+std::string Game::stringifyCategory(int cat) const {
+    std::vector<std::string> cats = {"Ones","Twos","Threes","Fours","Fives","Sixes","Three of A Kind","Four of a Kind","Full House","Small Straight","Large Straight","Yahtzee","Chance"};
+    return cats[cat];
+}
+
+
 
 void Game::toggleKeep(int index) {
     keep[index] = !keep[index];
