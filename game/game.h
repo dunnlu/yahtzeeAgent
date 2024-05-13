@@ -27,6 +27,7 @@ public:
     void printDice() const;
     void printScorecard() const;
     void printState() const;
+
     std::string stringifyCategory(int cat) const;
     
     std::vector<int> possibleScores() const;

@@ -32,6 +32,13 @@ int main(){
 
         actions = game.possibleActions();
 
+        // for (int j = 0; j < actions.size(); j++) {
+        //     for (int)
+        //     std::cout << actions[j][5] << std::endl;
+        //     std::cout << game.stringifyCategory(actions[j][5]) << std::endl;
+        // }
+            
+
     
 
         int best_reward = 0;

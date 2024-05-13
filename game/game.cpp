@@ -129,7 +129,7 @@ int Game::reward(int action5) {
         return 0;
     } else {
         std::vector<int> scores = possibleScores();
-        return scores[action5];
+        return scores[action5-6]; //since the scores array goes from 0 - 12, subtract 6 and return that
     }
 }
 
@@ -269,14 +269,15 @@ std::vector<std::vector<int>> Game::possibleActions() {
 
         // fill dice keep with ones, conceptually we are keeping all 5 dice but in reality it does not matter
 
-        for (int j = 0; j < 5; j++)
+        for (int j = 0; j < 5; j++) 
             actions[i][j] = 1;
-        
+        std::cout << "1 1 1 1 1 -- ";
         //next available square
 
         while (state[next] == 1)
             next++;
         actions[i][5] = next;
+        std::cout << next << std::endl;
         next++;
     }
 
@@ -302,8 +303,10 @@ std::vector<std::vector<int>> Game::possibleActions() {
 
             for (int j = 0; j<5; j++) {
                 actions[squares + i][j] = temp % 2;
+                std::cout << temp%2 << " ";
                 temp /= 2;
             }
+            std::cout << "-- -1" << std::endl;
             actions[squares + i][5] = -1;
         }
     }
@@ -486,9 +489,7 @@ int Game::countDice(int value) const {
 int Game::sumDice() const {
     int sum = 0;
     for (int i = 0; i < 5; ++i) {
-        if (keep[i]) {
-            sum += dice[i];
-        }
+        sum += dice[i];
     }
     return sum;
 }
@@ -523,7 +524,7 @@ bool Game::isSmallStraight() const {
     }
     return ((count[0] && count[1] && count[2] && count[3])||
             (count[1] && count[2] && count[3] && count[4])) || 
-                count[2] && count[3] && count[4] && count[5]; 
+                (count[2] && count[3] && count[4] && count[5]); 
 }
 
 bool Game::isLargeStraight() const {
