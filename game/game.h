@@ -3,6 +3,8 @@
 
 #include <vector>
 
+using json = nlohmann::json;
+
 class Die {
 public:
     int roll();
@@ -15,12 +17,16 @@ private:
     Die die;
     std::vector<int> state ; 
 
+
+    json diceOdds;
+
 public:
     Game();
 
     std::tuple<std::vector<int>,int,bool> step( std::vector<int> action ); 
     bool isTerminal() ; 
     std::vector<int> reset() ; 
+    std::vector<int> resetHalf() ;
 
     std::vector<std::vector<int>> possibleActions();
     
@@ -36,12 +42,20 @@ public:
 
 
     int reward(int action5);
+    int reward(std::vector<int> target, int action5);
 
     void goToState(std::vector<int> target);
 
+
+    std::vector<std::tuple<int,float>> transitionHalf(std::vector<int> state, std::vector<int> action);
+
 private:
     std::vector<std::vector<int>> diceConfigurations();
+    int dicePosition(std::vector<int> dice);
+    std::string stringifyDice(std::vector<int> dice);
+
     std::vector<std::vector<int>> scoreCardConfigHalf();
+    int scoreCardPositionHalf(std::vector<int> state);
 
     void rollDice();
     void toggleKeep(int index);

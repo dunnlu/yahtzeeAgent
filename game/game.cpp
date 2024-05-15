@@ -6,8 +6,12 @@
 #include <tuple> 
 #include <cmath>
 #include <string>
+#include <nlohmann/json.hpp>
+#include <fstream>
 
 #include "game.h"
+
+using json = nlohmann::json;
 
 int Die::roll() {
     return rand() % 6 + 1;
@@ -29,6 +33,12 @@ Game::Game() {
     dice.resize(5);
     // Set the size of the keep, initialize is to False. 
     keep.resize(5, false); 
+
+
+    //initialize the diceOdds vector
+    std::ifstream file("diceOdds.json");
+    file >> diceOdds;
+    
     
     // Reset the game. 
     reset() ; 
@@ -63,6 +73,31 @@ std::vector<std::vector<int>> Game::diceConfigurations() {
 }
 
 
+int Game::dicePosition(std::vector<int> dice) {
+    // Looking at positions 0-4
+    // Algorithm to decide the position in the dice config array
+
+    //just iterate through the json until you reach the dice config
+    std::string roll = stringifyDice(dice);
+    int count = 0;
+    for (auto it = diceOdds["5"].begin(); it!= diceOdds["5"].end(); ++it) //iterate through the json
+        if (it.key()==roll) //if the key (roll) is our roll, return the position
+            return count;
+        else
+            count++; //otherwise continue
+    return -1;
+}
+
+
+std::string Game::stringifyDice(std::vector<int> dice) {
+    std::string results;
+    results.resize(5);
+    for (int i = 0; i<5; i++)
+        results[i] = '0' + state[i];
+    return results;
+}
+
+
 std::vector<std::vector<int>> Game::scoreCardConfigHalf() {
     std::vector<std::vector<int>> config;
     int a,b,c,d,e,f, g;
@@ -76,25 +111,34 @@ std::vector<std::vector<int>> Game::scoreCardConfigHalf() {
                                 config.push_back({a,b,c,d,e,f,g});
                             }
     return config;
-}                   
+}   
+
+
+int Game::scoreCardPositionHalf(std::vector<int> state) {
+    // Looking at positions in the state: 12-18
+    int position = 0;
+    int place = 1;
+    for (int i = 18; i > 11; i--) {
+        if (state[i])
+            position += place;
+        place*=2;
+    }
+    return position;  
+
+
+}
 
 // Returns a 96,768 x 13 array of all state space configurations for the lower section only
 
 std::vector<std::vector<int>> Game::stateSpaceHalf() {
-    // if full = true --> generate full state space
-    // if full = false --> generate lower section only state space (indices of the scoreboard kept the same)
-
-    // distribution of spaces for state space i:
+   // distribution of spaces for state space i:
         // i % 252 == dice config
         // i/252 % 3 == rolls left
         // i / (252*3) == scorecard config
 
-    
     std::vector<std::vector<int>> space, diceConfig = diceConfigurations(), scorecardConfig = scoreCardConfigHalf();
 
     space.resize(3*252*128); // 3 rolls, 252 dice, scorecard configurations
-
-    // std::cout << "dice size: " << diceConfig.size() << std::endl;
 
     for (int i = 0; i < space.size(); i++) {
         space[i].resize(19);
@@ -118,6 +162,7 @@ std::vector<std::vector<int>> Game::stateSpaceHalf() {
     return space;
 }
 
+
 // Return the reward sent action (the only relevent information is the action taken in the 5th column of actions, the scorecard action)
 // Assume we are in the desired state
 
@@ -133,6 +178,13 @@ int Game::reward(int action5) {
     }
 }
 
+int Game::reward(std::vector<int> target, int action5) {
+    std::vector<int> temp = state
+    goToState(target);
+    int reward = reward(action5);
+    goToState(temp);
+}
+
 
 void Game::goToState(std::vector<int> target) {
     for (int i = 0; i < 5; i++)
@@ -140,6 +192,83 @@ void Game::goToState(std::vector<int> target) {
     for (int i = 0; i < 19; i++)
         state[i] = target[i];
 }
+
+
+
+
+std::vector<std::tuple<int,float>> Game::transitionHalf(std::vector<int> state, std::vector<int> action) {
+    // Where to find the state based on properties:
+        //252*3 * scorecardPosition + 252*rolls left + Position
+
+    std::vector<std::tuple<int,float>> transition;
+
+    // If the decision is not to score
+    
+    if (action[5] == -1) {
+        // initialize needed vars
+        scPos = scoreCardPositionHalf(state);
+
+        // determine how many dice are being rolled
+        std::vector<int> kept;
+        for (int i = 0; i < 5; i++)
+            if (action[i])
+                kept.push_back(state[i]);
+
+        char rolled = '5' - kept.size();
+
+        std::vector<int> roll.resize(5);
+        // create all rolls with the remaining dice, add the kept dice to the end, with corresponding odds
+        //go through each roll and return the position where that state is found, and the corresponding odds
+        for (auto it = diceOdds[rolled].begin(); it!= diceOdds[rolled].end(); ++it) {
+            // add the it roll with the kept dice
+            for (int i = 0; i < kept.size(); i++)
+                roll[i] = kept[i];
+            
+            for (int i = kept.size(); i < 5; i++)
+                roll[i] = it.key()[i] - '0';
+
+            // sort the roll
+            std::sort(dice.begin(),dice.end());
+
+            // add the tuple with the enumerated position and the corresponding odds to the transition vector
+            transition.push_back(std::make_tuple(252*3*scPos + 252*(state[5]-1) + dicePosition(roll)));
+
+        }
+
+        //return the transition array
+        return transition;
+    }
+
+    else 
+
+    // If the decision is to score, return a vector with 252 states, all 252 configurations of dice and their odds, along with the resulting square filled in
+
+    {
+        // initialize needed vars
+        state[action[5]+6] = 1;
+        scPos = scoreCardPositionHalf(state);
+        transition.resize(252);
+        int dicePosition = 0;
+
+
+        // go through all rolls of 5 dice in the diceOdds json
+        for (auto it = diceOdds["5"].begin(); it!= diceOdds["5"].end(); ++it) {
+
+            // add the enumerated position and the corresponding odds to the transition vector
+            transition[dicePosition] = std::make_tuple(252*3*scPos + 252*2 + dicePosition, it.value()); 
+
+            //next dice position
+            dicePosition++;
+        }
+
+        //return the transition vector
+
+        return transition;
+
+    }
+
+}
+
 
 
 std::tuple<std::vector<int>,int,bool> Game::step( std::vector<int> action ) { 
@@ -243,6 +372,33 @@ std::vector<int> Game::reset() {
     state[ 5 ] = 2 ; 
     // Set all of the taken to 0. 
     for ( int i = 6 ; i < 19 ; i ++ ) { 
+        state[ i ] = 0 ; 
+    } 
+
+    return state ; 
+
+} 
+
+std::vector<int> Game::resetHalf() { 
+
+    // Set all of the keep to False. 
+    resetKeep();
+    // Roll the dice. 
+    rollDice() ; 
+    // Copy the dice values to state. 
+    for ( int i = 0 ; i < 5 ; i ++ ) { 
+        state[ i ] = dice[ i ] ; 
+    } 
+    // Set the remaining roll to 2. 
+    state[ 5 ] = 2 ; 
+    // Set all of the upper section to taken (1) 
+    for ( int i = 6 ; i < 12 ; i ++ ) { 
+        state[ i ] = 1 ; 
+    } 
+
+    // Set all lower section to 0
+
+    for ( int i = 12 ; i < 19 ; i ++ ) { 
         state[ i ] = 0 ; 
     } 
 
