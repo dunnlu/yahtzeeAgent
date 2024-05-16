@@ -1,9 +1,9 @@
-import test.game_module as game_module # Make sure this matches the name of your module
+import test.game_module as game_module # Make sure to change this according to where your agent file is, mine is currently in the main repository. 
 import random
 
 class TQ_agent: 
     
-    def __init__( self , epsilon = 0.05 , alpha = 0.05 , gamma = 1 , batch_size = 10000 , batch_count = 10000 , trial_count = 100 ) : 
+    def __init__( self , epsilon = 0.05 , alpha = 0.05 , gamma = 1 , batch_size = 1000 , batch_count = 1000 , trial_count = 10000 ) : 
 
         # 1. Initialise the hyper parameters. 
         self.epsilon = epsilon  
@@ -50,8 +50,8 @@ class TQ_agent:
             [ 1 , 1 , 1 , 1 , 0 , - 1 ] , 
 
         ] 
-
-    def get_epsilon_greedy_action(self, state):
+    
+    def get_epsilon_greedy_action(self, state): # TODO: Not sure. 
         
         possible_actions = self.get_the_possible_actions(state)
         best_q = float("-inf")
@@ -66,7 +66,7 @@ class TQ_agent:
                 best_q = current_q
                 best_action = action
         if random.random() > self.epsilon: 
-            return best_action
+            return best_action 
         else: 
             return random.choice(possible_actions) 
 
@@ -90,7 +90,7 @@ class TQ_agent:
         
         if best_action == None : # TODO: this is weird 
             self.q_table[ ( tuple(state) , tuple( action ) ) ] = self.q_table[ ( tuple(state) , tuple( action ) ) ] + self.alpha * ( reward + self.gamma * 0 - self.q_table[ ( tuple(state) , tuple( action ) ) ] )  
-        
+
         else : 
             if ( tuple(state) , tuple( action ) ) not in self.q_table : 
                 self.q_table[ ( tuple(state) , tuple( action ) ) ] = 0 
@@ -151,15 +151,58 @@ class TQ_agent:
                 sum_reward += reward # TODO: might not be correct. 
         
         return sum_reward / self.trial_count 
+    
+    def just_train( self ) : 
+        idx = 0 
+        for _ in range( self.batch_count ) : 
+
+            idx += 1 
+            print(idx)
+            # print(f"test_count={test_count}")
+            self.train() 
 
     def train_test( self ) : 
 
-        for test_count in range( self.batch_count ) : 
+        for _ in range( self.batch_count ) : 
             # print(f"test_count={test_count}")
             self.train() 
             average_reward = self.test() 
             print( average_reward ) 
             self.reward_list.append( average_reward ) 
 
+    def test_random_agent( self ) : 
+
+        sum_reward = 0 
+        # Loop each trial count. 
+        for _ in range( self.trial_count ) : 
+            #print(f"test_start")
+            game = game_module.Game() 
+            state  = game.reset() 
+            is_terminal = False 
+            # Loop for each step of the episode. 
+            while is_terminal == False : 
+                action = self.get_random_action( state ) 
+                #print("test did not take action")
+                next_state , reward , is_terminal = game.step( action ) 
+                #print("test did not take action")
+                state = next_state 
+                sum_reward += reward # TODO: might not be correct. 
+        
+        return sum_reward / self.trial_count 
+    
+    def save_q_table_pickle(self, filename):
+        import pickle
+        with open(filename, 'wb') as f:
+            pickle.dump(self.q_table, f) 
+
+    def get_random_action( self , state ) : 
+        possible_actions = self.get_the_possible_actions( state ) 
+        # Sample an action from this list, each action has equal probability. 
+        action = random.choice( possible_actions ) 
+        return action 
+
 agent = TQ_agent() 
-agent.train_test() 
+# agent.train_test() 
+agent.just_train() 
+print(f"policy={agent.test()}") 
+print(f"random={agent.test_random_agent()}") 
