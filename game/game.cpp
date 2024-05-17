@@ -3,10 +3,11 @@
 #include <algorithm>
 #include <ctime>
 #include <cstdlib>
+#include <cstdio>
 #include <tuple> 
 #include <cmath>
 #include <string>
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 #include <fstream>
 
 #include "game.h"
@@ -34,16 +35,48 @@ Game::Game() {
     // Set the size of the keep, initialize is to False. 
     keep.resize(5, false); 
 
-
-    //initialize the diceOdds vector
-    std::ifstream file("diceOdds.json");
-    file >> diceOdds;
-    
+    readJSON();
     
     // Reset the game. 
     reset() ; 
 
+
 } 
+
+
+void Game::readJSON() {
+    
+
+    const char* file_path = "diceOdds.json";
+    FILE* file = fopen(file_path, "rb");
+
+    if (!file) {
+        std::cerr << "Failed to open file: " << file_path << std::endl;
+        exit(1);
+    }
+
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    std::vector<char> buffer(file_size);
+    fread(buffer.data(), 1, file_size, file);
+    fclose(file);
+
+    std::string json_string(buffer.begin(), buffer.end());
+
+    if (json_string.empty()) {
+        std::cerr << "File is empty: " << file_path << std::endl;
+        exit(1);
+    }
+
+    try {
+        diceOdds = nlohmann::json::parse(json_string);
+    } catch (const nlohmann::json::parse_error& e) {
+        std::cerr << "Parse error: " << e.what() << std::endl;
+        exit(1);
+    }
+}
 
 
 
@@ -93,7 +126,7 @@ std::string Game::stringifyDice(std::vector<int> dice) {
     std::string results;
     results.resize(5);
     for (int i = 0; i<5; i++)
-        results[i] = '0' + state[i];
+        results[i] = '0' + dice[i];
     return results;
 }
 
@@ -178,12 +211,6 @@ int Game::reward(int action5) {
     }
 }
 
-int Game::reward(std::vector<int> target, int action5) {
-    std::vector<int> temp = state
-    goToState(target);
-    int reward = reward(action5);
-    goToState(temp);
-}
 
 
 void Game::goToState(std::vector<int> target) {
@@ -196,13 +223,14 @@ void Game::goToState(std::vector<int> target) {
 
 
 
-std::vector<std::tuple<int,float>> Game::transitionHalf(std::vector<int> state, std::vector<int> action) {
+void Game::transitionHalf(std::vector<int> state, std::vector<int>& action, std::vector<std::tuple<int,float>>& transition) {
     // Where to find the state based on properties:
-        //252*3 * scorecardPosition + 252*rolls left + Position
+        //252*3 * scorecardPosition(half) + 252*rolls left + Position
 
-    std::vector<std::tuple<int,float>> transition;
+    transition.clear();
+    int scPos;
 
-    // If the decision is not to score
+    // If the action is to roll again
     
     if (action[5] == -1) {
         // initialize needed vars
@@ -216,7 +244,9 @@ std::vector<std::tuple<int,float>> Game::transitionHalf(std::vector<int> state, 
 
         char rolled = '5' - kept.size();
 
-        std::vector<int> roll.resize(5);
+        std::vector<int> roll;
+        roll.resize(5);
+        int count = 0;
         // create all rolls with the remaining dice, add the kept dice to the end, with corresponding odds
         //go through each roll and return the position where that state is found, and the corresponding odds
         for (auto it = diceOdds[rolled].begin(); it!= diceOdds[rolled].end(); ++it) {
@@ -231,20 +261,22 @@ std::vector<std::tuple<int,float>> Game::transitionHalf(std::vector<int> state, 
             std::sort(dice.begin(),dice.end());
 
             // add the tuple with the enumerated position and the corresponding odds to the transition vector
-            transition.push_back(std::make_tuple(252*3*scPos + 252*(state[5]-1) + dicePosition(roll)));
+            transition.push_back(std::make_tuple(252*3*scPos + 252*(state[5]-1) + dicePosition(roll), it.value()));
 
         }
 
         //return the transition array
-        return transition;
+        return;
     }
 
     else 
 
-    // If the decision is to score, return a vector with 252 states, all 252 configurations of dice and their odds, along with the resulting square filled in
+    // If the action is to score
 
     {
         // initialize needed vars
+
+        // score in square action[5] (stored in state starting at 6)
         state[action[5]+6] = 1;
         scPos = scoreCardPositionHalf(state);
         transition.resize(252);
@@ -263,7 +295,7 @@ std::vector<std::tuple<int,float>> Game::transitionHalf(std::vector<int> state, 
 
         //return the transition vector
 
-        return transition;
+        return;
 
     }
 

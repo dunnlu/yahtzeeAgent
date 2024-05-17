@@ -12,9 +12,11 @@ int main(){
     
     std::vector<int> policy;
     std::vector<int> value;
+    std::vector<std::tuple<int,float>> transition;
 
     policy.resize(space.size());
     value.resize(space.size());
+    transition.resize(252); //max size
 
     for (int i = 0; i < space.size(); i++){
         game.goToState(space[i]);
@@ -48,6 +50,13 @@ int main(){
             if (game.reward(actions[j][5]) > best_reward) {
                 best_reward = game.reward(actions[j][5]);
                 best_action = actions[j][5];
+            }
+
+            game.transitionHalf(space[i],actions[j],transition);
+            for (int k = 0; k < transition.size(); k++) {
+                std::cout << k << std::endl;
+                std::cout << "State pos: " << std::get<0>(transition[k]) << std::endl;
+                std::cout << "State odds: \n" << std::get<1>(transition[k]) << std::endl;
             }
 
 
