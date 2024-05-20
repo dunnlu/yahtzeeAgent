@@ -2,6 +2,7 @@
 #define game_h
 
 #include <vector>
+#include "json.hpp"
 
 using json = nlohmann::json;
 
@@ -42,14 +43,15 @@ public:
 
 
     int reward(int action5);
-    int reward(std::vector<int> target, int action5);
 
     void goToState(std::vector<int> target);
 
 
-    std::vector<std::tuple<int,float>> transitionHalf(std::vector<int> state, std::vector<int> action);
+    void transitionHalf(std::vector<int> state, std::vector<int>& action, std::vector<std::tuple<int,float>>& transition);
 
 private:
+    void readJSON();
+
     std::vector<std::vector<int>> diceConfigurations();
     int dicePosition(std::vector<int> dice);
     std::string stringifyDice(std::vector<int> dice);
