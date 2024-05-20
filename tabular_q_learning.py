@@ -1,9 +1,10 @@
 import test.game_module as game_module # Make sure to change this according to where your agent file is, mine is currently in the main repository. 
-import random
+import random 
+import time 
 
 class TQ_agent: 
     
-    def __init__( self , epsilon = 0.05 , alpha = 0.05 , gamma = 1 , batch_size = 1000 , batch_count = 1000 , trial_count = 10000 ) : 
+    def __init__( self , epsilon = 0.05 , alpha = 0.05 , gamma = 1 , batch_size = 2000 , batch_count = 10000 , trial_count = 10000 ) : 
 
         # 1. Initialise the hyper parameters. 
         self.epsilon = epsilon  
@@ -14,6 +15,9 @@ class TQ_agent:
         self.trial_count = trial_count 
         self.reward_list = [] 
         self.q_table = {} # { ( tuple( state ) , tuple( action ) ) : value } 
+
+        self.start_time = None 
+        self.end_time = None 
 
         self.possible_if_there_is_remaining_rolls = [ 
 
@@ -153,6 +157,7 @@ class TQ_agent:
         return sum_reward / self.trial_count 
     
     def just_train( self ) : 
+
         idx = 0 
         for _ in range( self.batch_count ) : 
 
@@ -162,13 +167,14 @@ class TQ_agent:
             self.train() 
 
     def train_test( self ) : 
-
+        self.start_time = time.time() 
         for _ in range( self.batch_count ) : 
             # print(f"test_count={test_count}")
             self.train() 
             average_reward = self.test() 
-            print( average_reward ) 
-            self.reward_list.append( average_reward ) 
+            self.end_time = time.time() 
+            print( average_reward , "," , self.end_time - self.start_time )  
+            # self.reward_list.append( average_reward ) 
 
     def test_random_agent( self ) : 
 
@@ -202,7 +208,7 @@ class TQ_agent:
         return action 
 
 agent = TQ_agent() 
-# agent.train_test() 
-agent.just_train() 
+agent.train_test() 
+"""agent.just_train() 
 print(f"policy={agent.test()}") 
-print(f"random={agent.test_random_agent()}") 
+print(f"random={agent.test_random_agent()}") """
