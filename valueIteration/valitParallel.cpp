@@ -3,22 +3,13 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <omp.h>
+#include <mutex>
 
 #include "../game/game.h"
 
+std::mutex print_mutex;
 
-// void writeVectorToFile(const std::vector<float>& vec, const std::string& filename) {
-//     std::ofstream outFile(filename, std::ios::binary);
-//     if (!outFile) {
-//         std::cerr << "Error opening file for writing: " << filename << std::endl;
-//         return;
-//     }
-
-//     size_t size = vec.size();
-//     outFile.write(reinterpret_cast<const char*>(&size), sizeof(size));
-//     outFile.write(reinterpret_cast<const char*>(vec.data()), size * sizeof(float));
-//     outFile.close();
-// }
 
 void writeVectorToFile(const std::vector<float>& vec, const std::string& filename) {
     std::ofstream outFile(filename);
@@ -47,24 +38,6 @@ void writeVectorToFileInt(const std::vector<int>& vec, const std::string& filena
     }
     outFile.close();
 }
-
-
-// std::vector<float> readVectorFromFile(const std::string& filename) {
-//     std::ifstream inFile(filename, std::ios::binary);
-//     if (!inFile) {
-//         std::cerr << "Error opening file for reading: " << filename << std::endl;
-//         return {};
-//     }
-
-//     size_t size;
-//     inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
-    
-//     std::vector<float> vec(size);
-//     inFile.read(reinterpret_cast<char*>(vec.data()), size * sizeof(float));
-//     inFile.close();
-    
-//     return vec;
-// }
 
 std::vector<float> readVectorFromFile(const std::string& filename) {
     std::ifstream inFile(filename);
@@ -106,28 +79,36 @@ std::vector<int> readVectorFromFileInt(const std::string& filename) {
 }
 
 // Returns (value, policy)
-std::tuple<std::vector<float>,std::vector<int>> valit(float epsilon, int max_iters) {
+std::tuple<std::vector<float>,std::vector<int>> valit(float epsilon, int max_iters, int numt) {
+
+    #ifdef _OPENMP
+        fprintf( stderr, "OpenMP is supported -- version = %d\n", _OPENMP );
+    #else
+        fprintf( stderr, "No OpenMP support!\n" );
+        exit(1);
+    #endif
+
+    omp_set_num_threads(numt);
+
     Game game;
 
     std::vector<std::vector<int>> space = game.stateSpaceHalf();
 
-    std::vector<std::vector<int>> actions;
+    
     
     std::vector<int> policy;
     std::vector<float> value;
     std::vector<float> tempValue;
 
-    std::vector<std::tuple<int,float>> transition;
+    
 
-    int best_action, curr_iters;
-    float best_value, temp_value; //, residual, max_residual;
+    int curr_iters;
 
     curr_iters = 0;
 
     policy.resize(space.size());
     value.resize(space.size());
     tempValue.resize(space.size());
-    transition.resize(252);
 
     for (int v = 0; v < value.size(); v++)
         value[v] = 0;
@@ -136,18 +117,33 @@ std::tuple<std::vector<float>,std::vector<int>> valit(float epsilon, int max_ite
     while (curr_iters < max_iters) {
         std::cout << "Iteration " << curr_iters << std::endl;
         // max_residual = 0;
-        for (int s = 0; s < space.size(); s++) {
-            if (s%1000 == 0)
-                std::cout << "State " << s << std::endl;
-            game.goToState(space[s]);
-            actions = game.possibleActions();
+ 
+        #pragma omp parallel for default(none) shared(space, policy, value, tempValue, /*print_mutex, std::cout,*/ game)
+        for (int s = 0; s < 100; s++) {
+            Game local_game = game;
+            std::vector<std::vector<int>> actions;
+            std::vector<std::tuple<int,float>> transition;
+            transition.resize(252);
+
+
+            int best_action;
+            float best_value, temp_value;
+
+
+            // if (s%1000 == 0) {
+                // std::lock_guard<std::mutex> guard(print_mutex);        
+                // std::cout << "State " << s << std::endl;
+            // }
+        
+            local_game.goToState(space[s]);
+            actions = local_game.possibleActions();
             best_value = 0;
             best_action = 0;
             for (int a = 0; a < actions.size(); a++) {
                 // std::cout << "Action " << a << " [5] = " << actions[a][5] << std::endl;
-                temp_value = game.reward(actions[a][5]);
+                temp_value = local_game.reward(actions[a][5]);
                 // std::cout << "Got reward: " << temp_value << std::endl;
-                game.transitionHalf(space[s],actions[a],transition);
+                local_game.transitionHalf(space[s],actions[a],transition);
                 // std::cout << "Got transition" << std::endl;
                 for (int t = 0; t < transition.size(); t++) {
                     // std::cout << "Transition " << t << std::endl;
@@ -193,13 +189,15 @@ std::tuple<std::vector<float>,std::vector<int>> valit(float epsilon, int max_ite
 }
 
 
-int main() {
-    valit(0.1,20);
+int main() { 
 
-    // std::vector<float> value = readVectorFromFile("valitFiles/valit1.txt");
 
-    // for (int i = 0; i < 100; i++)
-    //     std::cout << i << " | " << value[i] << std::endl;
+    valit(0.1,20,4);
+
+    std::vector<float> value = readVectorFromFile("valitFiles/valit1.txt");
+
+    for (int i = 0; i < 100; i++)
+        std::cout << i << " | " << value[i] << std::endl;
 
 
     return 0;
