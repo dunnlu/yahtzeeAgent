@@ -5,14 +5,14 @@
 
 
 // Returns (value, policy)
-std::tuple<std::vector<int>,std::vector<std::vector<int>>> valit(float epsilon, int max_iters) {
+std::tuple<std::vector<int>,std::vector<int>> valit(float epsilon, int max_iters) {
     Game game;
 
     std::vector<std::vector<int>> space = game.stateSpaceHalf();
 
     std::vector<std::vector<int>> actions;
     
-    std::vector<std::vector<int>> policy;
+    std::vector<int> policy;
     std::vector<int> value;
     std::vector<int> tempValue;
 
@@ -24,8 +24,6 @@ std::tuple<std::vector<int>,std::vector<std::vector<int>>> valit(float epsilon, 
     curr_iters = 0;
 
     policy.resize(space.size());
-    for (int i = 0; i < policy.size(); i++)
-        policy[i].resize(6);
     value.resize(space.size());
     tempValue.resize(space.size());
     transition.resize(252);
@@ -59,13 +57,13 @@ std::tuple<std::vector<int>,std::vector<std::vector<int>>> valit(float epsilon, 
                 } 
             }
             tempValue[s] = best_value;
-            policy[s] = actions[best_action];
+            policy[s] = best_action;
             residual = abs(best_value - value[s]);
             max_residual = std::max(max_residual,residual);
 
             game.printState();
             std::cout << "Value: " << best_value << std::endl;
-            std::cout << "Action: " << policy[s][5] << std::endl;
+            std::cout << "Action: " << actions[best_action][5] << std::endl;
             std::cout << std::endl;
         }
         value = tempValue;
