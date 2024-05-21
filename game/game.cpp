@@ -242,7 +242,9 @@ void Game::transitionHalf(std::vector<int> state, std::vector<int>& action, std:
             if (action[i])
                 kept.push_back(state[i]);
 
-        char rolled = '5' - kept.size();
+        std::string rolled;
+        rolled.resize(1);
+        rolled[0] = '5' - kept.size();
 
         std::vector<int> roll;
         roll.resize(5);
@@ -255,7 +257,7 @@ void Game::transitionHalf(std::vector<int> state, std::vector<int>& action, std:
                 roll[i] = kept[i];
             
             for (int i = kept.size(); i < 5; i++)
-                roll[i] = it.key()[i] - '0';
+                roll[i] = it.key()[i-kept.size()] - '0';
 
             // sort the roll
             std::sort(dice.begin(),dice.end());
@@ -459,13 +461,13 @@ std::vector<std::vector<int>> Game::possibleActions() {
 
         for (int j = 0; j < 5; j++) 
             actions[i][j] = 1;
-        std::cout << "1 1 1 1 1 -- ";
+        // std::cout << "1 1 1 1 1 -- ";
         //next available square
 
         while (state[next] == 1)
             next++;
         actions[i][5] = next;
-        std::cout << next << std::endl;
+        // std::cout << next << std::endl;
         next++;
     }
 
@@ -491,10 +493,10 @@ std::vector<std::vector<int>> Game::possibleActions() {
 
             for (int j = 0; j<5; j++) {
                 actions[squares + i][j] = temp % 2;
-                std::cout << temp%2 << " ";
+                // std::cout << temp%2 << " ";
                 temp /= 2;
             }
-            std::cout << "-- -1" << std::endl;
+            // std::cout << "-- -1" << std::endl;
             actions[squares + i][5] = -1;
         }
     }
