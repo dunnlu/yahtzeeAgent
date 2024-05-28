@@ -200,12 +200,18 @@ class TQ_agent:
         action = random.choice( possible_actions ) 
         return action 
 
-print( "__________________________1____________")
+print( 1 ) 
 agent = TQ_agent( 0.1 , 0.1 , 100 , 100 , 100 ) 
+the_result = agent.test_random_agent( just_lower= True ) 
+print(f"the_result={the_result}")
+agent = TQ_agent( 0.1 , 0.1 , 100 , 100 , 100 ) 
+the_result = agent.test_random_agent( just_lower= False ) 
+print(f"the_result={the_result}")
+print( "__________________________1____________") 
+agent = TQ_agent( 0.1 , 0.1 , 100 , 100 , 10000 ) 
 agent.train_test( just_lower= True ) 
-
-print( "__________________________2____________")
-agent = TQ_agent( 0.1 , 0.1 , 100 , 100 , 100 ) 
+print( "__________________________2____________") 
+agent = TQ_agent( 0.1 , 0.1 , 100 , 100 , 10000 ) 
 agent.train_test( just_lower= False ) 
 
 

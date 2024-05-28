@@ -1,5 +1,5 @@
 #include <pybind11/pybind11.h>
-#include "../game/game.h"  // Ensure this includes the definition of your Game class 
+#include "../game/game_2.h"  // Ensure this includes the definition of your Game class 
 #include <pybind11/stl.h>  // Include this to handle std::vector
 
 namespace py = pybind11;
