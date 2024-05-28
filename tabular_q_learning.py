@@ -4,12 +4,12 @@ import time
 
 class TQ_agent: 
     
-    def __init__( self , epsilon = 0.05 , alpha = 0.05 , gamma = 1 , batch_size = 2000 , batch_count = 10000 , trial_count = 10000 ) : 
+    def __init__( self , epsilon = 0.05 , alpha = 0.05 , batch_size = 2000 , batch_count = 10000 , trial_count = 10000 ) : 
 
         # 1. Initialise the hyper parameters. 
         self.epsilon = epsilon  
         self.alpha = alpha  
-        self.gamma = gamma 
+        self.gamma = 1  
         self.batch_size = batch_size 
         self.batch_count = batch_count 
         self.trial_count = trial_count 
@@ -94,7 +94,6 @@ class TQ_agent:
         
         if best_action == None : # TODO: this is weird 
             self.q_table[ ( tuple(state) , tuple( action ) ) ] = self.q_table[ ( tuple(state) , tuple( action ) ) ] + self.alpha * ( reward + self.gamma * 0 - self.q_table[ ( tuple(state) , tuple( action ) ) ] )  
-
         else : 
             if ( tuple(state) , tuple( action ) ) not in self.q_table : 
                 self.q_table[ ( tuple(state) , tuple( action ) ) ] = 0 
@@ -116,16 +115,17 @@ class TQ_agent:
         for category_idx in remaining_categories : 
             possible_actions.append( [ 1 , 1 , 1 , 1 , 1 , category_idx ] ) 
 
-        #print(f"len(possible_actions)={len(possible_actions)}")
-
         return possible_actions 
 
-    def train( self ) : 
+    def train( self , just_lower = False ) : 
 
         # Loop each episode. 
         for _ in range( self.batch_size ) : 
             game = game_module.Game() 
-            state  = game.reset() 
+            if just_lower == True : 
+                state = game.resetHalf() 
+            else : 
+                state  = game.reset() 
             is_terminal = False 
             # Loop for each step of the episode. 
             while is_terminal == False : 
@@ -136,61 +136,54 @@ class TQ_agent:
                 self.update_the_q_table( state , action , reward , next_state , best_action ) 
                 state = next_state 
 
-    def test( self ) : 
+    def test( self , just_lower = False ) : 
         
         sum_reward = 0 
         # Loop each trial count. 
         for _ in range( self.trial_count ) : 
-            #print(f"test_start")
             game = game_module.Game() 
-            state  = game.reset() 
+            if just_lower == True : 
+                state = game.resetHalf() 
+            else : 
+                state  = game.reset() 
             is_terminal = False 
             # Loop for each step of the episode. 
             while is_terminal == False : 
                 action = self.get_the_best_action( state ) 
-                #print("test did not take action")
                 next_state , reward , is_terminal = game.step( action ) 
-                #print("test did not take action")
                 state = next_state 
                 sum_reward += reward # TODO: might not be correct. 
         
         return sum_reward / self.trial_count 
     
-    def just_train( self ) : 
+    def just_train( self , just_lower ) : 
 
-        idx = 0 
         for _ in range( self.batch_count ) : 
+            self.train( just_lower )  
 
-            idx += 1 
-            print(idx)
-            # print(f"test_count={test_count}")
-            self.train() 
-
-    def train_test( self ) : 
+    def train_test( self , just_lower = False ) : 
         self.start_time = time.time() 
         for _ in range( self.batch_count ) : 
-            # print(f"test_count={test_count}")
-            self.train() 
-            average_reward = self.test() 
+            self.train( just_lower )  
+            average_reward = self.test( just_lower ) 
             self.end_time = time.time() 
-            print( average_reward , "," , self.end_time - self.start_time )  
-            # self.reward_list.append( average_reward ) 
+            print( average_reward , "," , self.end_time - self.start_time ) 
 
-    def test_random_agent( self ) : 
+    def test_random_agent( self , just_lower ) : 
 
         sum_reward = 0 
         # Loop each trial count. 
         for _ in range( self.trial_count ) : 
-            #print(f"test_start")
             game = game_module.Game() 
-            state  = game.reset() 
+            if just_lower == True : 
+                state = game.resetHalf() 
+            else : 
+                state  = game.reset() 
             is_terminal = False 
             # Loop for each step of the episode. 
             while is_terminal == False : 
                 action = self.get_random_action( state ) 
-                #print("test did not take action")
                 next_state , reward , is_terminal = game.step( action ) 
-                #print("test did not take action")
                 state = next_state 
                 sum_reward += reward # TODO: might not be correct. 
         
@@ -207,8 +200,12 @@ class TQ_agent:
         action = random.choice( possible_actions ) 
         return action 
 
-agent = TQ_agent() 
-agent.train_test() 
-"""agent.just_train() 
-print(f"policy={agent.test()}") 
-print(f"random={agent.test_random_agent()}") """
+print( "__________________________1____________")
+agent = TQ_agent( 0.1 , 0.1 , 100 , 100 , 100 ) 
+agent.train_test( just_lower= True ) 
+
+print( "__________________________2____________")
+agent = TQ_agent( 0.1 , 0.1 , 100 , 100 , 100 ) 
+agent.train_test( just_lower= False ) 
+
+

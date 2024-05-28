@@ -12,6 +12,7 @@ PYBIND11_MODULE(game_module, m) {  // The name here, 'game_module', is what you'
         // Add other methods as necessary 
         .def("step", &Game::step)  // Binding the printDice method
         .def("isTerminal", &Game::isTerminal)  // Binding the printDice method
-        .def("reset", &Game::reset)  // Binding the printDice method
+        .def("reset", &Game::reset)  // Binding the printDice method 
+        .def("resetHalf", &Game::resetHalf)  // Binding the printDice method
         ;
 }
