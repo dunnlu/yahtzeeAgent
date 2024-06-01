@@ -1,11 +1,22 @@
-# Yahtzee Agent
-## Intro
-First, read the official [Yahtzee rules](https://www.officialgamerules.org/yahtzee). For a hands-on experience of playing the game yourself and getting a feel for the rules visit [this website](https://cardgames.io/yahtzee/). The rest of the problem description will follow assuming you know the rules of the game. 
----
-## Decision Making
-The game of Yahtzee is random in many ways, but there are a few crucial decisions a player can make to maximize their score. For example if a player is going for a large straight, and they roll [1, 2, 3, 5, 6], should they keep the 1 or the 6? The answer depends on what their backup plan is if they don’t happen to roll that crucial 4. If they have their “Chance” category open, they should keep the six in order to maximize the number of points they get in that square. If the “Chance” category is full and their “Ones” category is open however, they might be better off keeping the one, and cutting their losses if they happen to roll a “1” instead of a “4”. (The advantage to keeping the 1 in this case is that they would be putting two points in their “Ones” place rather than just the single point they would have if they had kept the 6 instead of the 1.) Another crucial example is if on your first turn, after your three rolls, you have [6 6 6 6 3]. Do you put it in your four-of-a-kind and take the 27 points? Or is it better in the long term to put it in your “Sixes”, taking 24 points instead of 27 points, but setting yourself up for the future to be more likely to get the bonus of 35 points at the end of the game. (Note that another downside to putting the points into the “Sixes” is opportunity cost → you might not get another high scoring four-of-a-kind, but you will likely get at least three 6’s to put in your “Sixes” category.)
-There are many of these types of decisions, where it is not instantly obvious what the best statistical long term play is. This makes it an interesting problem, as given the closed nature of the game, and the limited (albeit stochastic) branches of possibilities, there is surely an optimal series of decisions a player can make to increase their expected score.
----
-## Goal
-Our goal is to write a program which chooses the optimal dice to store and the optimal category to put the points in, in order to maximize its expected score.
-*Note that we will only be considering our own score, not our opponents. Where this comes into account is, for example, if you are very far behind your opponent, there may be a case where you should go for yahtzees exclusively, as it gives a non-zero chance to make a comeback, but at the cost of your own expected score. This would be a natural followup, but for the sake of simplicity, and setting an initial goal for the project, we propose only considering our own score.*
+# CS 499 - Yahtzee. 
+
+# Instructions for compiling and running the project. 
+
+### Tabular Q-Learning. 
+
+I have developed, and tested the code using the flip servers, so it definitely works there and instructions are for compiling and running the project on flip. 
+I have used the college of engineering interactive desktops, to train it, because I can log off from them, and the process is not killed, therefore the training continues. I did this because I had a lot of trouble getting the python-c++ bindings work submitting the trainings as a job to the DGX machines. 
+
+1. Create a virtual environment. 
+2. Activate it. 
+3. Install pybind. 
+4. Compile the bindings. (g++ -std=c++11 -O3 -Wall -shared -fPIC `python3 -m pybind11 --includes` game/game_2.cpp pybind/game_bindings.cpp -o test/game_module`python3-config --extension-suffix`) 
+5. Change directory to test directory. 
+6. Start the training. (python tabular_q_learning.py) 
+
+
+
+
+
+
+
