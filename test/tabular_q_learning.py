@@ -225,6 +225,7 @@ class TQ_agent:
                 print( f"reward={reward}.")
                 state = next_state 
                 sum_reward += reward # TODO: might not be correct. 
+        print(f"The score of the agent: {sum_reward}. ")
 
     def create_demonstration( self , the_name = None , iteration = 1 , just_lower = False ) : 
         if the_name != None : 
@@ -251,22 +252,26 @@ class TQ_agent:
                 sum_reward += reward # TODO: might not be correct. 
 
         return sum_reward / eval_trial_count 
-    
 
-# Train just lower. 
-print("________________________ The Just Lower ________________") 
-agent = TQ_agent( 0.3 , 0.3 , 100 , 10 , 100 ) 
-agent.train_test( just_lower= True ) 
-# agent.save_q_table_pickle( "just_lower" ) 
-agent.create_demonstration( None , 1 , just_lower= True) 
-evaluation_average_reward = agent.evaluate( eval_trial_count = 10000 , just_lower= True ) 
-print(f"1. The just lower, evaluation average reward = {evaluation_average_reward}. ")
+def main() : 
 
-# Train not just lower. 
-print("________________________ The Not Just Lower ________________") 
-agent = TQ_agent( 0.3 , 0.3 , 100 , 10 , 100 ) 
-agent.train_test( just_lower= False ) 
-# agent.save_q_table_pickle( "not_just_lower" ) 
-agent.create_demonstration( None , 1 , just_lower= False) 
-evaluation_average_reward = agent.evaluate( eval_trial_count = 10000 , just_lower= False ) 
-print(f"1. The not just lower, evaluation average reward = {evaluation_average_reward}. ")
+    # Train just lower. 
+    print("________________________ The Just Lower ________________") 
+    agent = TQ_agent( 0.3 , 0.3 , 100 , 10 , 100 ) 
+    agent.train_test( just_lower= True ) 
+    agent.create_demonstration( None , 1 , just_lower= True) 
+    evaluation_average_reward = agent.evaluate( eval_trial_count = 10000 , just_lower= True ) 
+    print(f"1. The just lower, evaluation average reward = {evaluation_average_reward}. ") 
+    agent.save_q_table_pickle( "just_lower" ) 
+
+    """# Train not just lower. 
+    print("________________________ The Not Just Lower ________________") 
+    agent = TQ_agent( 0.3 , 0.3 , 100 , 10 , 100 ) 
+    agent.train_test( just_lower= False ) 
+    # agent.save_q_table_pickle( "not_just_lower" ) 
+    agent.create_demonstration( None , 1 , just_lower= False) 
+    evaluation_average_reward = agent.evaluate( eval_trial_count = 10000 , just_lower= False ) 
+    print(f"1. The not just lower, evaluation average reward = {evaluation_average_reward}. ") """
+
+if __name__ == "__main__" : 
+    main() 
