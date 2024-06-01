@@ -189,29 +189,85 @@ class TQ_agent:
         
         return sum_reward / self.trial_count 
     
-    def save_q_table_pickle(self, filename):
-        import pickle
-        with open(filename, 'wb') as f:
-            pickle.dump(self.q_table, f) 
-
     def get_random_action( self , state ) : 
         possible_actions = self.get_the_possible_actions( state ) 
         # Sample an action from this list, each action has equal probability. 
         action = random.choice( possible_actions ) 
         return action 
 
-# print( 1 ) 
-# agent = TQ_agent( 0.1 , 0.1 , 100 , 100 , 100 ) 
-# the_result = agent.test_random_agent( just_lower= True ) 
-# print(f"the_result={the_result}")
-# agent = TQ_agent( 0.1 , 0.1 , 100 , 100 , 100 ) 
-# the_result = agent.test_random_agent( just_lower= False ) 
-# print(f"the_result={the_result}")
-# print( "__________________________1____________") 
-"""agent = TQ_agent( 0.3 , 0.3 , 100 , 100000 , 100 ) 
-agent.train_test( just_lower= True ) """
-# print( "__________________________2____________") 
-agent = TQ_agent( 0.3 , 0.3 , 100 , 100000 , 100 ) 
+    def save_q_table_pickle(self, filename):
+        import pickle
+        with open(filename, 'wb') as f:
+            pickle.dump(self.q_table, f) 
+
+    def load_q_table_pickle(self, filename):
+        import pickle
+        with open(filename, 'rb') as f:
+            self.q_table = pickle.load(f) 
+
+    def test_demonstration( self , just_lower = False ) : 
+        
+        sum_reward = 0 
+        # Loop each trial count. 
+        for _ in range( 1 ) : 
+            game = game_module.Game() 
+            if just_lower == True : 
+                state = game.resetHalf() 
+            else : 
+                state  = game.reset() 
+            is_terminal = False 
+            # Loop for each step of the episode. 
+            while is_terminal == False : 
+                print( f"state={state}.")
+                action = self.get_the_best_action( state ) 
+                print( f"action={action}.")
+                next_state , reward , is_terminal = game.step( action ) 
+                print( f"reward={reward}.")
+                state = next_state 
+                sum_reward += reward # TODO: might not be correct. 
+
+    def create_demonstration( self , the_name = None , iteration = 1 , just_lower = False ) : 
+        if the_name != None : 
+            self.load_q_table_pickle(the_name) 
+        for i in range( iteration ) : 
+            print( f"Iteration: {i}. _____________________________________________________________ ") 
+            self.test_demonstration( just_lower ) 
+
+    def evaluate( self , eval_trial_count = 1000 , just_lower = False ) : 
+        sum_reward = 0 
+        # Loop each trial count. 
+        for _ in range( eval_trial_count ) : 
+            game = game_module.Game() 
+            if just_lower == True : 
+                state = game.resetHalf() 
+            else : 
+                state  = game.reset() 
+            is_terminal = False 
+            # Loop for each step of the episode. 
+            while is_terminal == False : 
+                action = self.get_the_best_action( state ) 
+                next_state , reward , is_terminal = game.step( action ) 
+                state = next_state 
+                sum_reward += reward # TODO: might not be correct. 
+
+        return sum_reward / eval_trial_count 
+    
+
+    
+# Train just lower. 
+print("________________________ The Just Lower ________________") 
+agent = TQ_agent( 0.3 , 0.3 , 100 , 10000 , 100 ) 
+agent.train_test( just_lower= True ) 
+# agent.save_q_table_pickle( "just_lower" ) 
+agent.create_demonstration( None , 1 , just_lower= True) 
+evaluation_average_reward = agent.evaluate( eval_trial_count = 1000 , just_lower= True ) 
+print(f"1. The just lower, evaluation average reward = {evaluation_average_reward}. ")
+
+# Train not just lower. 
+print("________________________ The Not Just Lower ________________") 
+agent = TQ_agent( 0.3 , 0.3 , 100 , 10000 , 100 ) 
 agent.train_test( just_lower= False ) 
-
-
+# agent.save_q_table_pickle( "not_just_lower" ) 
+agent.create_demonstration( None , 1 , just_lower= False) 
+evaluation_average_reward = agent.evaluate( eval_trial_count = 1000 , just_lower= False ) 
+print(f"1. The not just lower, evaluation average reward = {evaluation_average_reward}. ")
