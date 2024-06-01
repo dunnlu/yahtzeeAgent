@@ -257,7 +257,7 @@ def main() :
 
     # Train just lower. 
     print("________________________ The Just Lower ________________") 
-    agent = TQ_agent( 0.3 , 0.3 , 100 , 10 , 100 ) 
+    agent = TQ_agent( 0.3 , 0.3 , 100 , 10000 , 100 ) 
     agent.train_test( just_lower= True ) 
     agent.create_demonstration( None , 1 , just_lower= True) 
     evaluation_average_reward = agent.evaluate( eval_trial_count = 10000 , just_lower= True ) 
@@ -266,7 +266,7 @@ def main() :
 
     # Train not just lower. 
     print("________________________ The Not Just Lower ________________") 
-    agent = TQ_agent( 0.3 , 0.3 , 100 , 10 , 100 ) 
+    agent = TQ_agent( 0.3 , 0.3 , 100 , 10000 , 100 ) 
     agent.train_test( just_lower= False ) 
     agent.create_demonstration( None , 1 , just_lower= False) 
     evaluation_average_reward = agent.evaluate( eval_trial_count = 10000 , just_lower= False ) 
@@ -275,3 +275,5 @@ def main() :
 
 if __name__ == "__main__" : 
     main() 
+
+    
