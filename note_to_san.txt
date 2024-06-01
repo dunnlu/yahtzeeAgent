@@ -1,2 +1,0 @@
-1. The come_on venv is working. 
-2. Let there be 2 tabular_q_learning.py, it is fine. 
