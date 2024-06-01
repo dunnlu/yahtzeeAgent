@@ -14,9 +14,9 @@ I have used the college of engineering interactive desktops, to train it, becaus
 5. Change directory to test directory. 
 6. Start the training. (python tabular_q_learning.py) 
 
+1. Actually, if I just clone it from GitHub, it works, it does not require to compile it again. It might be because the bindings are already in the repository, however for submit-a, (interactive desktop) this never works. I think I have pybind installed on flip, that is probably why, I guess also the python version matters
 
-
-
-
-
+1. tabular_q_learning.py. (train, test etc.)
+2. lat_just_lower.py. (Load and Test just lower, load the q_table, complete 1 episode, print the episode, print the score of the agent.)
+3. lat_not_just_lower. (Load and Test not just lower, load the q_table, complete 1 episode, print the episode, print the score of the agent.) 
 

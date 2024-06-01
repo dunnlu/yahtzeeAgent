@@ -264,14 +264,14 @@ def main() :
     print(f"1. The just lower, evaluation average reward = {evaluation_average_reward}. ") 
     agent.save_q_table_pickle( "just_lower" ) 
 
-    """# Train not just lower. 
+    # Train not just lower. 
     print("________________________ The Not Just Lower ________________") 
     agent = TQ_agent( 0.3 , 0.3 , 100 , 10 , 100 ) 
     agent.train_test( just_lower= False ) 
-    # agent.save_q_table_pickle( "not_just_lower" ) 
     agent.create_demonstration( None , 1 , just_lower= False) 
     evaluation_average_reward = agent.evaluate( eval_trial_count = 10000 , just_lower= False ) 
-    print(f"1. The not just lower, evaluation average reward = {evaluation_average_reward}. ") """
+    print(f"1. The not just lower, evaluation average reward = {evaluation_average_reward}. ") 
+    agent.save_q_table_pickle( "not_just_lower" ) 
 
 if __name__ == "__main__" : 
     main() 
