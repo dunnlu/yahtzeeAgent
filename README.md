@@ -21,3 +21,15 @@ I have used the college of engineering interactive desktops, to train it, becaus
 2. lat_just_lower.py. (Load and Test just lower, load the q_table, complete 1 episode, print the episode, print the score of the agent.)
 3. lat_not_just_lower. (Load and Test not just lower, load the q_table, complete 1 episode, print the episode, print the score of the agent.) 
 
+
+### Every Visit Monte Carlo.
+
+The code was developed and tested on OSU HPC eecs partition and dgx2 partition, so it definetly works there. Compiling and running the project on eecs partition and dgx2 partition.
+To compile + run:
+1. navigate to the root directory of this project.
+2. Run "pip install pybind"
+3. Run "g++ -std=c++11 -O3 -Wall -shared -fPIC `python3 -m pybind11 --includes` game/game.cpp pybind/game_bindings.cpp -o test/game_module`python3-config --extension-suffix`"
+4. Run "cd test/"
+5. evmc.py is used to specify the hyperparameters and train (learned Q function will be saved to a .pkl file)
+6. evmc_eval.ipynb is used to load the saved Q function and use it to evalue the performance, create example runs, etc.
+
