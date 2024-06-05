@@ -26,6 +26,7 @@ public:
 
     std::tuple<std::vector<int>,int,bool> step( std::vector<int> action ); 
     bool isTerminal() ; 
+    bool rollsLeft();
     std::vector<int> reset() ; 
     std::vector<int> resetHalf() ;
 
@@ -45,6 +46,7 @@ public:
     int reward(int action5);
 
     void goToState(std::vector<int> target);
+    int findState();
 
 
     void transitionHalf(std::vector<int> state, std::vector<int>& action, std::vector<std::tuple<int,float>>& transition);

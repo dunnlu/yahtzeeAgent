@@ -7,18 +7,6 @@
 #include "../game/game.h"
 
 
-// void writeVectorToFile(const std::vector<float>& vec, const std::string& filename) {
-//     std::ofstream outFile(filename, std::ios::binary);
-//     if (!outFile) {
-//         std::cerr << "Error opening file for writing: " << filename << std::endl;
-//         return;
-//     }
-
-//     size_t size = vec.size();
-//     outFile.write(reinterpret_cast<const char*>(&size), sizeof(size));
-//     outFile.write(reinterpret_cast<const char*>(vec.data()), size * sizeof(float));
-//     outFile.close();
-// }
 
 void writeVectorToFile(const std::vector<float>& vec, const std::string& filename) {
     std::ofstream outFile(filename);
@@ -48,23 +36,6 @@ void writeVectorToFileInt(const std::vector<int>& vec, const std::string& filena
     outFile.close();
 }
 
-
-// std::vector<float> readVectorFromFile(const std::string& filename) {
-//     std::ifstream inFile(filename, std::ios::binary);
-//     if (!inFile) {
-//         std::cerr << "Error opening file for reading: " << filename << std::endl;
-//         return {};
-//     }
-
-//     size_t size;
-//     inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
-    
-//     std::vector<float> vec(size);
-//     inFile.read(reinterpret_cast<char*>(vec.data()), size * sizeof(float));
-//     inFile.close();
-    
-//     return vec;
-// }
 
 std::vector<float> readVectorFromFile(const std::string& filename) {
     std::ifstream inFile(filename);
@@ -106,7 +77,7 @@ std::vector<int> readVectorFromFileInt(const std::string& filename) {
 }
 
 // Returns (value, policy)
-std::tuple<std::vector<float>,std::vector<int>> valit(float epsilon, int max_iters) {
+std::tuple<std::vector<float>,std::vector<int>> valit(int starting_iters, int max_iters) {
     Game game;
 
     std::vector<std::vector<int>> space = game.stateSpaceHalf();
@@ -115,22 +86,29 @@ std::tuple<std::vector<float>,std::vector<int>> valit(float epsilon, int max_ite
     
     std::vector<int> policy;
     std::vector<float> value;
+    if (starting_iters==-1)
+        for (int v = 0; v < value.size(); v++)
+            value[v] = 0;
+    else {
+        std::stringstream ss3;
+        ss3 << "valitFiles/valit" << starting_iters << ".txt";
+        std::string filename = ss3.str();
+        value = readVectorFromFile(filename);
+    }
+
     std::vector<float> tempValue;
 
     std::vector<std::tuple<int,float>> transition;
 
     int best_action, curr_iters;
-    float best_value, temp_value; //, residual, max_residual;
+    float best_value, temp_value; 
 
-    curr_iters = 0;
+    curr_iters = starting_iters+1;
 
     policy.resize(space.size());
     value.resize(space.size());
     tempValue.resize(space.size());
     transition.resize(252);
-
-    for (int v = 0; v < value.size(); v++)
-        value[v] = 0;
 
 
     while (curr_iters < max_iters) {
@@ -140,33 +118,29 @@ std::tuple<std::vector<float>,std::vector<int>> valit(float epsilon, int max_ite
             if (s%1000 == 0)
                 std::cout << "State " << s << std::endl;
             game.goToState(space[s]);
-            actions = game.possibleActions();
-            best_value = 0;
-            best_action = 0;
-            for (int a = 0; a < actions.size(); a++) {
-                // std::cout << "Action " << a << " [5] = " << actions[a][5] << std::endl;
-                temp_value = game.reward(actions[a][5]);
-                // std::cout << "Got reward: " << temp_value << std::endl;
-                game.transitionHalf(space[s],actions[a],transition);
-                // std::cout << "Got transition" << std::endl;
-                for (int t = 0; t < transition.size(); t++) {
-                    // std::cout << "Transition " << t << std::endl;
-                    temp_value += std::get<1>(transition[t]) * value[std::get<0>(transition[t])];
-                }
-                if (temp_value > best_value) {
-                    best_value = temp_value;
-                    best_action = a;
-                } 
-            }
-            tempValue[s] = best_value;
-            policy[s] = best_action;
-            // residual = abs(best_value - value[s]);
-            // max_residual = std::max(max_residual,residual);
 
-            // game.printState();
-            // std::cout << "Value: " << best_value << std::endl;
-            // std::cout << "Action: " << actions[best_action][5] << std::endl;
-            // std::cout << std::endl;
+            if (game.isTerminal()) {
+                tempValue[s] = 0;
+                policy[s] = -1;
+            } else {
+
+                actions = game.possibleActions();
+                best_value = 0;
+                best_action = 0;
+                for (int a = 0; a < actions.size(); a++) {
+                    temp_value = game.reward(actions[a][5]);
+                    game.transitionHalf(space[s],actions[a],transition);
+                    for (int t = 0; t < transition.size(); t++) {
+                        temp_value += std::get<1>(transition[t]) * value[std::get<0>(transition[t])];
+                    }
+                    if (temp_value > best_value) {
+                        best_value = temp_value;
+                        best_action = a;
+                    } 
+                }
+                tempValue[s] = best_value;
+                policy[s] = best_action;
+            }
         }
         value = tempValue;
 
@@ -181,28 +155,17 @@ std::tuple<std::vector<float>,std::vector<int>> valit(float epsilon, int max_ite
         writeVectorToFileInt(policy,filename2);
 
         curr_iters++;
-
-        // Exit Clause
-        // if (max_residual < epsilon)
-        //     break;
     }
-
-    // std::cout << max_residual << std::endl;
 
     return std::make_tuple(value, policy);
 }
 
 
 int main() {
-    valit(0.1,20);
-
-    // std::vector<float> value = readVectorFromFile("valitFiles/valit1.txt");
-
-    // for (int i = 0; i < 100; i++)
-    //     std::cout << i << " | " << value[i] << std::endl;
+    valit(3,4); 
 
 
     return 0;
 }
 
-
+ 

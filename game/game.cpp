@@ -17,7 +17,7 @@ using json = nlohmann::json;
 int Die::roll() {
     return rand() % 6 + 1;
 }
-
+ 
 Game::Game() { 
 
 
@@ -221,6 +221,15 @@ void Game::goToState(std::vector<int> target) {
 }
 
 
+int Game::findState() {
+    int scPos=scoreCardPositionHalf(state);
+    int dPos = dicePosition(dice);
+    int rlPos = state[5];
+
+    return 252*3*scPos + 252*rlPos + dPos;
+
+
+}
 
 
 void Game::transitionHalf(std::vector<int> state, std::vector<int>& action, std::vector<std::tuple<int,float>>& transition) {
@@ -278,8 +287,8 @@ void Game::transitionHalf(std::vector<int> state, std::vector<int>& action, std:
     {
         // initialize needed vars
 
-        // score in square action[5] (stored in state starting at 6)
-        state[action[5]+6] = 1;
+        //
+        state[action[5]] = 1;
         scPos = scoreCardPositionHalf(state);
         transition.resize(252);
         int dicePosition = 0;
@@ -378,7 +387,6 @@ std::tuple<std::vector<int>,int,bool> Game::step( std::vector<int> action ) {
    } 
 } 
 
-
 bool Game::isTerminal() 
 {
     bool terminal = true ; 
@@ -391,6 +399,12 @@ bool Game::isTerminal()
     } 
 
     return terminal ; 
+}
+
+
+bool Game::rollsLeft()
+{
+    return state[5] > 0;
 }
 
 std::vector<int> Game::reset() { 
@@ -559,7 +573,9 @@ void Game::printDice() const {
 void Game::printScorecard() const{
     std::cout << "Scorecard: [ ";
     for (int i = 6; i < 19; ++i) {
-        std::cout << state[i] << " ";
+        std::cout << stringifyCategory(i-6) << " " << state[i] << " | ";
+        if (i == 11)
+            std::cout << std::endl;
     }
     std::cout << "]" << std::endl;
 }
