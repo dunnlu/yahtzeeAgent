@@ -14,49 +14,28 @@ OR
 
     cd evaluate
 
-
 ### Tabular Q-Learning. 
 
 I have developed, and tested the code using the flip servers, so it definitely works there and instructions are for compiling and running the project on flip. 
-I have used the college of engineering interactive desktops, to train it, because I can log off from them, and the process is not killed, therefore the training continues. I did this because I had a lot of trouble getting the python-c++ bindings work submitting the trainings as a job to the DGX machines. 
+I have used the college of engineering interactive desktops, to train it, because I can log off from them, and the process is not killed, therefore the training continues. I did this because I had a lot of trouble getting the python-c++ bindings work submitting the trainings as a job to the DGX machines. The instructions will assume the use of flip. 
 
-From the HPC:
-
-Create a python virtual environment. 
-
-    pip install virtualenv
-    pip install virtualenvwrapper-win
-    python3 -m venv qlearningEnv
-
-Activate it. 
-
-    source qlearningEnv/bin/activate
-
-Install pybind. 
+To compile + run:
+Navigate to the root directory of this project.
+Install dependencies. 
 
     pip install pybind
 
-Compile the bindings. 
+Compile the python bindings. 
 
     g++ -std=c++11 -O3 -Wall -shared -fPIC `python3 -m pybind11 --includes` game/game_2.cpp pybind/game_bindings.cpp -o test/game_module`python3-config --extension-suffix`
 
-Change directory to test directory. 
+Navigate to test folder. 
 
     cd test/
 
-Start the training. 
+Running the tabular_q_learning.py will start the training, and will print out the eval results for each batch, with the time relative to the start of the training. 
 
-    python tabular_q_learning.py
-
-
-Actually, if I just clone it from GitHub, it works, it does not require to compile it again. It might be because the bindings are already in the repository, however for dgx-2, (interactive desktop) this never works. I think I have pybind installed on flip, that is probably why, I guess also the python version matters. 
-
-Actually, it also works on dgx-2, I think one of the compiled bindings are for flip, and the other is for dgx-2. 
-
-1. tabular_q_learning.py. (train, test etc.)
-2. lat_just_lower.py. (Load and Test just lower, load the q_table, complete 1 episode, print the episode, print the score of the agent.)
-3. lat_not_just_lower. (Load and Test not just lower, load the q_table, complete 1 episode, print the episode, print the score of the agent.) 
-
+    python tabular_q_learning.py 
 
 ### Every Visit Monte Carlo.
 
