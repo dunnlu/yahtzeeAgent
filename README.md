@@ -23,7 +23,11 @@ To compile + run:
 Navigate to the root directory of this project.
 Install dependencies. 
 
-    pip install pybind
+    pip install pybind 
+
+If the previous does not work, try this. 
+
+    pip install pybind11 
 
 Compile the python bindings. 
 
@@ -42,10 +46,10 @@ Running the tabular_q_learning.py will start the training, and will print out th
 The code was developed and tested on OSU HPC eecs partition and dgx2 partition, so it definetly works there. Compiling and running the project on eecs partition and dgx2 partition.
 
 To compile + run:
-Navigate to the root directory of this project.
+Navigate to the root directory of this project. 
 Install dependencies
 
-    pip install pybind
+    pip install pybind 
 
 Compile the python bindings 
 
