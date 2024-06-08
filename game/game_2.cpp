@@ -38,6 +38,13 @@ Game::Game() {
 
 } 
 
+void Game::goToState(std::vector<int> target) {
+    for (int i = 0; i < 5; i++)
+        dice[i] = target[i];
+    for (int i = 0; i < 19; i++)
+        state[i] = target[i];
+}
+
 /*
     Function to return the list of all 252 dice combinations in non decreasing order
 

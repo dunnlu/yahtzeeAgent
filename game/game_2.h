@@ -15,8 +15,10 @@ private:
     Die die;
     std::vector<int> state ; 
 
+
 public:
     Game();
+    void goToState(std::vector<int> target);
 
     std::tuple<std::vector<int>,int,bool> step( std::vector<int> action ); 
     bool isTerminal() ; 
