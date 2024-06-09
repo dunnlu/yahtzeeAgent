@@ -165,7 +165,8 @@ class TQ_agent:
         self.start_time = time.time() 
         for _ in range( self.batch_count ) : 
             self.train( just_lower )  
-            average_reward = self.test( just_lower ) 
+            # average_reward = self.test( just_lower ) 
+            average_reward = self.evaluate( self.trial_count , just_lower ) 
             self.end_time = time.time() 
             print( average_reward , "," , self.end_time - self.start_time ) 
 
