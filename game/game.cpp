@@ -201,13 +201,19 @@ std::vector<std::vector<int>> Game::stateSpaceHalf() {
 
 int Game::reward(int action5) {
     
-    // if the action is not to score or we are in a terminal state
-    
-    if ((action5 == -1)) {
+    // if the action is not to score
+    if (action5 == -1)
         return 0;
-    } else {
+    else {
+        action5 -= 6;
         std::vector<int> scores = possibleScores();
-        return scores[action5-6]; //since the scores array goes from 0 - 12, subtract 6 and return that
+        if (scores[action5] == 0) // if scoring zero in a box
+            return -1;
+        if (action5 == 6) // three of a kind
+            return scores[action5] - 1;
+        if (action5 == 12) // chance
+            return scores[action5] - 2;
+        return scores[action5];
     }
 }
 
@@ -251,6 +257,12 @@ void Game::transitionHalf(std::vector<int> state, std::vector<int>& action, std:
             if (action[i])
                 kept.push_back(state[i]);
 
+        // If the decision is to keep all 5 dice
+        if (kept.size() == 5) {
+            transition.push_back(std::make_tuple(252*3*scPos + 252*(state[5]-1) + dicePosition(kept), 1.0));
+            return;
+        }
+
         std::string rolled;
         rolled.resize(1);
         rolled[0] = '5' - kept.size();
@@ -269,7 +281,7 @@ void Game::transitionHalf(std::vector<int> state, std::vector<int>& action, std:
                 roll[i] = it.key()[i-kept.size()] - '0';
 
             // sort the roll
-            std::sort(dice.begin(),dice.end());
+            std::sort(roll.begin(),roll.end());
 
             // add the tuple with the enumerated position and the corresponding odds to the transition vector
             transition.push_back(std::make_tuple(252*3*scPos + 252*(state[5]-1) + dicePosition(roll), it.value()));

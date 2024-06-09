@@ -12,7 +12,7 @@
 
 #define numEps 1000
 
-#define numPol 22
+#define numPol 10
 
 #define human true
 
