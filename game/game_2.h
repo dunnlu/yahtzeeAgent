@@ -2,9 +2,6 @@
 #define game_h
 
 #include <vector>
-#include "json.hpp"
-
-using json = nlohmann::json;
 
 class Die {
 public:
@@ -19,14 +16,12 @@ private:
     std::vector<int> state ; 
 
 
-    json diceOdds;
-
 public:
     Game();
+    void goToState(std::vector<int> target);
 
     std::tuple<std::vector<int>,int,bool> step( std::vector<int> action ); 
     bool isTerminal() ; 
-    bool rollsLeft();
     std::vector<int> reset() ; 
     std::vector<int> resetHalf() ;
 
@@ -35,28 +30,15 @@ public:
     void printDice() const;
     void printScorecard() const;
     void printState() const;
-
-    std::string stringifyCategory(int cat) const;
     
     std::vector<int> possibleScores() const;
 
-    std::vector<std::vector<int>> stateSpaceHalf();
-
-
     int reward(int action5);
 
-    void goToState(std::vector<int> target);
-    int findState();
-
-
-    void transitionHalf(std::vector<int> state, std::vector<int>& action, std::vector<std::tuple<int,float>>& transition);
 
 private:
-    void readJSON();
 
-    std::vector<std::vector<int>> diceConfigurations();
     int dicePosition(std::vector<int> dice);
-    std::string stringifyDice(std::vector<int> dice);
 
     std::vector<std::vector<int>> scoreCardConfigHalf();
     int scoreCardPositionHalf(std::vector<int> state);
@@ -82,7 +64,6 @@ private:
     int largeStraight() const;
     int yahtzee() const;
     int chance() const;
-
 
     int countDice(int value) const;
     int sumDice() const;
