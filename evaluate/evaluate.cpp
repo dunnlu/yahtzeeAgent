@@ -14,7 +14,7 @@
 
 #define numPol 10
 
-#define human true
+#define human false
 
 
 
