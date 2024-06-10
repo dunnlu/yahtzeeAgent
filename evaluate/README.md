@@ -22,3 +22,7 @@ Must have diceOdds.json, evaluate.o, and game.o as well as the execution file pr
 numEps --> Number of episodes for random and tested policies NOT human
 numPol --> Number of policies tested. If you are testing up to 'polit21.txt' then you would input '22' 
 human --> True if you are human testing. False if you are just testing random and the tested policies. Always 10 episodes. 
+
+### Game Settings
+
+Make sure to adjust game.cpp to the reward mode of "0". This is the pure reward mode, and essential for calculating scores accurately. 
