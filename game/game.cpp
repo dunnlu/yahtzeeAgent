@@ -14,10 +14,23 @@
 
 using json = nlohmann::json;
 
+
+#define rewardMode 0
+/*
+    Reward Modes
+    - 0 : Minimalistic
+    - 1 : Experimental 
+    - 2 : Common Human Strategy
+    - 3 : Minimalistic Human Strategy
+
+    The two mentioned in the report are 0 and 2
+
+*/
+
 int Die::roll() {
     return rand() % 6 + 1;
 }
- 
+
 Game::Game() { 
 
 
@@ -200,22 +213,121 @@ std::vector<std::vector<int>> Game::stateSpaceHalf() {
 // Assume we are in the desired state
 
 int Game::reward(int action5) {
-    
-    // if the action is not to score
-    if (action5 == -1)
-        return 0;
-    else {
+    if (action5 != -1)
         action5 -= 6;
-        std::vector<int> scores = possibleScores();
-        if (scores[action5] == 0) // if scoring zero in a box
-            return -1;
-        if (action5 == 6) // three of a kind
-            return scores[action5] - 1;
-        if (action5 == 12) // chance
-            return scores[action5] - 2;
-        return scores[action5];
+
+    switch (rewardMode) {
+        case 0:
+            if ((action5 == -1)) {
+                return 0;
+            } else {
+                std::vector<int> scores = possibleScores();
+                return scores[action5]; //since the scores array goes from 0 - 12, subtract 6 and return that
+            }
+            break;
+        case 1:
+            if ((action5 == -1)) {
+                return -1;
+            } else {
+                std::vector<int> scores = possibleScores();
+                if (scores[action5] == 0)
+                    return -10;
+                return scores[action5]; //since the scores array goes from 0 - 12, subtract 6 and return that
+            }
+            break;
+        case 2:
+            // The following reward
+                // rerolling --> always 0
+                // with nonzero score
+                    // tok  sumOfDice - 1
+                    // fok sumOfDice
+                    // fh 25
+                    // ss 30
+                    // ls 40
+                    // y 50
+                    // chance -1 
+                // for scoring 0 in a box:
+                    // tok -10
+                    // fok -7
+                    // fh -10
+                    // ss -10
+                    // ls  -7
+                    // y - 4
+            if (action5 == -1) {
+                return 0;
+            } else {
+                std::vector<int> scores = possibleScores();
+                if (scores[action5] == 0)
+                    switch (action5) {
+                        case 6: //three of a kind
+                            return -10;
+                            break;
+                        case 7: //four of a kind
+                            return -7;
+                            break;
+                        case 8: //full house
+                            return -10;
+                            break;
+                        case 9: //small straight
+                            return -10;
+                            break;
+                        case 10: //large straight
+                            return -7;
+                            break;
+                        case 11: // yahtzee
+                            return -4;
+                            break;
+                    }
+                else 
+                    switch (action5) {
+                        case 6: //three of a kind
+                            return scores[action5] - 1; // we want to prioritize three of a kind. Chance will also be the last one we score in always
+                            break;
+                        case 7: //four of a kind
+                            return scores[action5];
+                            break;
+                        case 8: //full house
+                            return scores[action5];
+                            break;
+                        case 9: //small straight
+                            return scores[action5];
+                            break;
+                        case 10: //large straight
+                            return scores[action5];
+                            break;
+                        case 11: // yahtzee
+                            return scores[action5];
+                            break;
+                        case 12: // chance
+                            return -1;
+                            break;
+                    }
+            }
+            break;
+        case 3: 
+            // reroll --> 0
+            // score 0 --> -1
+            // score in the order:
+                // four of a kind if avail (- 0)
+                // three of a kind (- 1)
+                // chance (-2)
+            if (action5 == -1)
+                return 0;
+            else {
+                std::vector<int> scores = possibleScores();
+                if (scores[action5] == 0)
+                    return -1;
+                if (action5 == 6) // three of a kind
+                    return scores[action5] - 1;
+                if (action5 == 12)
+                    return scores[action5] - 2;
+                return scores[action5];
+            }
+            break;
     }
+    return 0;
 }
+
 
 
 
@@ -254,14 +366,16 @@ void Game::transitionHalf(std::vector<int> state, std::vector<int>& action, std:
         // determine how many dice are being rolled
         std::vector<int> kept;
         for (int i = 0; i < 5; i++)
-            if (action[i])
+            if (action[i]) 
                 kept.push_back(state[i]);
-
+            
+        
         // If the decision is to keep all 5 dice
         if (kept.size() == 5) {
             transition.push_back(std::make_tuple(252*3*scPos + 252*(state[5]-1) + dicePosition(kept), 1.0));
             return;
         }
+
 
         std::string rolled;
         rolled.resize(1);
@@ -561,10 +675,6 @@ int Game::countAvailableSquares() {
 }
 
 void Game::rollDice() {
-    if (rollsLeft == 0)
-        return;
-
-
     for (int i = 0; i < 5; ++i) {
         if (!keep[i]) {
             dice[i] = die.roll();
@@ -639,15 +749,6 @@ std::vector<int> Game::possibleScores() const {
         chance()
     };
     return scores;
-}
-
-
-void Game::resetRollsLeft(){
-    rollsLeft = 3;
-}
-
-int Game::getRollsLeft(){
-    return rollsLeft;
 }
 
 int Game::ones() const {

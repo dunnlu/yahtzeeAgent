@@ -9,12 +9,41 @@
 
 #include "../game/game.h"
 
+#define evaluatePolicies true  // If true, the policies in the chosen valitFolder will be tested
 
-#define numEps 1000
+#define numEps 1000             // Number of episodes to test for each iteration in the valitFolder
 
-#define numPol 10
+#define numPol 17                // Number of policies in the valitFolder to test
 
-#define human false
+/*
+    Recommended Numbers for Each valitFolder:
+        - valitFilesExample         4
+        - valitFilesCommonHuman     22
+        - valitFilesMinimalistic    17
+
+*/
+
+#define human false             // If true, the user will play the game
+
+#define valitFolder "valitFilesMinimalistic" 
+/*
+    Options:
+        - valitFilesExample 
+        - valitFilesCommonHuman
+        - valitFilesMinimalistic
+*/
+
+#define showPolicy 16            // -1 to show no policy
+
+/*
+    Recommended Numbers for Each valitFolder:
+        - valitFilesExample         3
+        - valitFilesCommonHuman     21
+        - valitFilesMinimalistic    16
+
+*/
+
+#define numShownGames 0         // Number of games shown for the chosen policy
 
 
 
@@ -77,28 +106,13 @@ float testPolicy(Game& game, std::vector<std::vector<int>>& space, std::vector<i
 
         // play until terminal
         while(!game.isTerminal()){
-            // std::cout << "Next" << std::endl;
-            // game.printState();
-
+            
             // enumerate state
             int pos = game.findState();
-
-            // std::cout << "POS " << pos << std::endl;
-
-            // game.goToState(space[pos]);
-
-            // game.printState();
 
             // decide the action
 
             action = game.possibleActions()[policy[pos]]; // store the action at the index of possible actions which is stored in the policy for the state we are in
-
-            // std::cout << "POLICY POS " << policy[pos] << std::endl;
-
-            // std::cout << "ACTION " << std::endl;
-            // for (int j = 0; j < 6; j++)
-            //     std::cout << action[j] << " | ";
-            // std::cout << std::endl;
 
             // fix action
             if (action[5] != -1)
@@ -109,19 +123,12 @@ float testPolicy(Game& game, std::vector<std::vector<int>>& space, std::vector<i
             reward = game.step(action);
 
 
-            // game.printState();
-
-
             // add to sum
             localSum += std::get<1>(reward);
-
-            // std::cout << "LOCAL SUM " << localSum << std::endl;
 
         }
 
         sum += localSum;
-        
-        // std::cout << i << ", " << localSum << std::endl;
         
 
     }
@@ -136,7 +143,7 @@ float testPolicy(Game& game, std::vector<std::vector<int>>& space, std::vector<i
 
 std::vector<int> policyFromFile(int p) {
     std::stringstream ss;
-    ss << "../valueIteration/valitFiles/polit" << p << ".txt";
+    ss << "../valueIteration/" << valitFolder << "/polit" << p << ".txt";
     std::string filename = ss.str();
 
     return readVectorFromFileInt(filename);
@@ -144,7 +151,62 @@ std::vector<int> policyFromFile(int p) {
 
 
 // Step through game to show what each policy would choose, and take an action myself to decide
+void policyShowGame(Game& game, std::vector<std::vector<int>>& space, std::vector<int>& policy) {
+    // initialize vars
+    float sum=0;
 
+
+    std::vector<int> action;
+
+
+
+
+    std::tuple<std::vector<int>,int,bool> reward;
+    
+    
+    
+    // reset game and sum
+    game.resetHalf();
+
+    // play until terminal
+    while(!game.isTerminal()){
+        // std::cout << "Next" << std::endl;
+        std::cout << "Score: " << sum << std::endl;
+        game.printState();
+
+        // enumerate state
+        int pos = game.findState();
+
+        // decide the action
+
+        action = game.possibleActions()[policy[pos]]; // store the action at the index of possible actions which is stored in the policy for the state we are in
+
+        // fix action
+        if (action[5] != -1)
+            action[5] -= 6;
+
+        std::cout << "ACTION " << std::endl;
+        if (action[5] == -1) {
+            for (int j = 0; j < 4; j++)
+                std::cout << action[j] << " | ";
+            std::cout << action[4] << std::endl;
+        } else
+            std::cout << game.stringifyCategory(action[5]) << std::endl;
+        std::cout << std::endl;
+
+        // take a step, according to the policy
+        reward = game.step(action);
+
+
+        // add to sum
+        sum += std::get<1>(reward);
+
+    }
+    
+    std::cout << "Final Score: " << sum << std::endl << std::endl;  
+
+
+}
 
 
 
@@ -222,12 +284,6 @@ float humanTest(Game& game) {
             std::cout << std::endl;
             std::cout << std::endl;
 
-            // std::cout << "POLICY POS " << policy[pos] << std::endl;
-
-            // std::cout << "ACTION " << std::endl;
-            // for (int j = 0; j < 6; j++)
-            //     std::cout << action[j] << " | ";
-            // std::cout << std::endl;
 
             // fix action
             if (action[5] != -1)
@@ -244,8 +300,6 @@ float humanTest(Game& game) {
             // add to sum
             localSum += std::get<1>(reward);
 
-            // std::cout << "LOCAL SUM " << localSum << std::endl;
-
         }
 
         sum += localSum;
@@ -253,9 +307,6 @@ float humanTest(Game& game) {
         std::cout << "Game Score :" << localSum << std::endl;
         std::cout << "Running Average: " << sum/(i) << std::endl;
 
-        
-        
-        // std::cout << i << ", " << localSum << std::endl;
         
 
     }
@@ -313,7 +364,20 @@ int main() {
     std::vector<int> policy;
     policy.resize(space.size());
 
+    // Show a runthrough of the chosen policy
+    if (showPolicy != -1) {
+        policy = policyFromFile(showPolicy);
+        for (int i = 0; i < numShownGames; i++) 
+            policyShowGame(game,space,policy);
+    }
+
+
+
+
     // Test numEps episodes of testing policy
+    if (!evaluatePolicies) // If you dont want to evaluate, just exit
+        exit(0);
+
 
     for (int i = 0; i < numPol; i++) {
         policy = policyFromFile(i);

@@ -6,6 +6,8 @@
 
 #include "../game/game.h"
 
+#define valitFolder "valitFilesExample"
+
 
 
 void writeVectorToFile(const std::vector<float>& vec, const std::string& filename) {
@@ -86,15 +88,22 @@ std::tuple<std::vector<float>,std::vector<int>> valit(int starting_iters, int ma
     
     std::vector<int> policy;
     std::vector<float> value;
+
+    std::stringstream ss;
+
+    std::string filename;
+
     if (starting_iters==-1)
         for (int v = 0; v < value.size(); v++)
             value[v] = 0;
     else {
-        std::stringstream ss3;
-        ss3 << "valitFiles/valit" << starting_iters << ".txt";
-        std::string filename = ss3.str();
+        ss << valitFolder << "/valit" << starting_iters << ".txt";
+        filename = ss.str();
         value = readVectorFromFile(filename);
     }
+
+    std::cout << "Read in file " << filename << std::endl;
+    std::cout << "Performing value iteration from iteration " << starting_iters+1 << " to " << max_iters-1 << std::endl;
 
     std::vector<float> tempValue;
 
@@ -113,7 +122,6 @@ std::tuple<std::vector<float>,std::vector<int>> valit(int starting_iters, int ma
 
     while (curr_iters < max_iters) {
         std::cout << "Iteration " << curr_iters << std::endl;
-        // max_residual = 0;
         for (int s = 0; s < space.size(); s++) {
             if (s%1000 == 0)
                 std::cout << "State " << s << std::endl;
@@ -127,16 +135,55 @@ std::tuple<std::vector<float>,std::vector<int>> valit(int starting_iters, int ma
                 actions = game.possibleActions();
                 best_value = 0;
                 best_action = 0;
+
+                // // print state
+                // game.printState();
+                // // end debug
+
+
+
                 for (int a = 0; a < actions.size(); a++) {
                     temp_value = game.reward(actions[a][5]);
                     game.transitionHalf(space[s],actions[a],transition);
+
+                    // // print the action and reward
+                    // std::cout << "Action " << a << std::endl;
+                    // for (int h = 0; h < 6; h++)
+                    //     std::cout << actions[a][h] << " | ";
+                    // std::cout << temp_value << std::endl;
+                    // // end debug
+                    
                     for (int t = 0; t < transition.size(); t++) {
                         temp_value += std::get<1>(transition[t]) * value[std::get<0>(transition[t])];
+
+                        // // print the state and odds and temp_value, and value
+                        // game.goToState(space[std::get<0>(transition[t])]);
+                        // game.printState();
+                        // std::cout << "Odds: " << std::get<1>(transition[t]) << std::endl;
+                        // std::cout << "Val: " << value[std::get<0>(transition[t])] << std::endl;
+                        // std::cout << "Curr val: " << temp_value << std::endl << std::endl;
+                        // game.goToState(space[s]);
+                        //end debug
+
+
                     }
                     if (temp_value > best_value) {
+                        
                         best_value = temp_value;
                         best_action = a;
                     } 
+
+                    // // print the action and reward
+                    // std::cout << "Action " << a << std::endl;
+                    // for (int h = 0; h < 6; h++)
+                    //     std::cout << actions[a][h] << " | ";
+                    // std::cout << temp_value << std::endl;
+                    // // end debug
+
+
+
+                    std::string wait;
+                    std::cin >> wait;
                 }
                 tempValue[s] = best_value;
                 policy[s] = best_action;
@@ -144,14 +191,16 @@ std::tuple<std::vector<float>,std::vector<int>> valit(int starting_iters, int ma
         }
         value = tempValue;
 
-        std::stringstream ss;
-        ss << "valitFiles/valit" << curr_iters << ".txt";
+        ss.str("");
+        ss.clear();
+        ss << valitFolder << "/valit" << curr_iters << ".txt";
         std::string filename = ss.str();
         writeVectorToFile(value,filename);
 
-        std::stringstream ss2;
-        ss2 << "valitFiles/polit" << curr_iters << ".txt";
-        std::string filename2 = ss2.str();
+        ss.str("");
+        ss.clear();
+        ss << valitFolder << "/polit" << curr_iters << ".txt";
+        std::string filename2 = ss.str();
         writeVectorToFileInt(policy,filename2);
 
         curr_iters++;
@@ -162,10 +211,32 @@ std::tuple<std::vector<float>,std::vector<int>> valit(int starting_iters, int ma
 
 
 int main() {
-    valit(3,4); 
+    std::cout << "Starting" << std::endl;
+    valit(2,4); 
+    /*
+        To start from the beginning, do (-1, <end_iteration + 1>)
+        To start from an existing value function, do (<#>, <end_iteration + 1>) and be sure to set the valitFolder at the top of this file 
+
+        The default example will have the value function of iteration 2 loaded, start from iteration 3, and stop before doing the 4th iteration.
+
+        Example: 
+            #define valitFolder "myValitFolder"
+
+            int main() {
+                valit(-1,22)
+            }
+
+        Example 2:
+            #define valitFolder "valitFilesMinimalistic"
+
+            int main() {
+                valit(16,22)
+            }
+    
+    */
 
 
     return 0;
 }
 
- 
+
